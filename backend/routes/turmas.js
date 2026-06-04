@@ -22,41 +22,41 @@ function auth(req, res, next) {
   }
 }
 
-// 🔥 LISTAR
+// 🔥 LISTAR TURMAS
 router.get("/", auth, async (req, res) => {
   try {
     const pool = await poolPromise;
 
     const result = await pool.request()
-      .query("SELECT * FROM alunos");
+      .query("SELECT * FROM turmas");
 
     res.json(result.recordset);
 
   } catch (err) {
-    console.log("🔥 ERRO LISTAR:", err);
+    console.log("🔥 ERRO LISTAR TURMAS:", err);
     res.status(500).json({ erro: err.message });
   }
 });
 
-// 🔥 CADASTRAR
+// 🔥 CADASTRAR TURMA
 router.post("/", auth, async (req, res) => {
   try {
-    const { nome, data_nascimento } = req.body;
+    const { nome, ano } = req.body;
 
     const pool = await poolPromise;
 
     await pool.request()
       .input("nome", sql.VarChar, nome)
-      .input("data_nascimento", sql.Date, data_nascimento)
+      .input("ano", sql.Int, ano)
       .query(`
-        INSERT INTO alunos (nome, data_nascimento)
-        VALUES (@nome, @data_nascimento)
+        INSERT INTO turmas (nome, ano)
+        VALUES (@nome, @ano)
       `);
 
     res.json({ ok: true });
 
   } catch (err) {
-    console.log("🔥 ERRO CADASTRO:", err);
+    console.log("🔥 ERRO CADASTRAR TURMA:", err);
     res.status(500).json({ erro: err.message });
   }
 });
