@@ -17,7 +17,7 @@ function auth(req, res, next) {
   try {
     jwt.verify(
       token,
-      process.env.JWT_SECRET || "segredo"
+      process.env.JWT_SECRET
     );
 
     next();
@@ -49,15 +49,13 @@ router.post("/", auth, async (req, res) => {
     const { nome, ano } = req.body;
 
     await pool.query(
-      `
-      INSERT INTO turmas
-      (nome, ano)
-      VALUES($1,$2)
-      `,
+      "INSERT INTO turmas(nome, ano) VALUES($1,$2)",
       [nome, ano]
     );
 
-    res.json({ ok: true });
+    res.json({
+      ok: true
+    });
 
   } catch (err) {
     res.status(500).json({

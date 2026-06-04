@@ -1,37 +1,36 @@
 require("dotenv").config();
 
-
 const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/auth");
 const alunosRoutes = require("./routes/alunos");
 const professoresRoutes = require("./routes/professores");
-const turmasRoutes = require("./routes/turmas"); // 👈 NOVO
+const turmasRoutes = require("./routes/turmas");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// 🔥 DEBUG
+// DEBUG
 app.use((req, res, next) => {
-  console.log("🔥 REQ:", req.method, req.url);
+  console.log("REQ:", req.method, req.url);
   next();
 });
 
-// 🔥 ROTAS
+// ROTAS
 app.use("/login", authRoutes);
 app.use("/alunos", alunosRoutes);
 app.use("/professores", professoresRoutes);
-app.use("/turmas", turmasRoutes); // 👈 NOVO
+app.use("/turmas", turmasRoutes);
 
-// 🔥 ROOT
+// TESTE
 app.get("/", (req, res) => {
   res.send("API Sistema Escolar funcionando");
 });
 
-// 🔥 404
+// 404
 app.use((req, res) => {
   res.status(404).json({
     erro: "Rota não encontrada",
@@ -40,6 +39,9 @@ app.use((req, res) => {
   });
 });
 
-app.listen(3001, () => {
-  console.log("🚀 Servidor rodando na porta 3001");
+// PORTA DO RENDER
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
