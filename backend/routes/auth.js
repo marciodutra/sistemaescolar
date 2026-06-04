@@ -1,83 +1,63 @@
 const express = require("express");
 const router = express.Router();
-
 const jwt = require("jsonwebtoken");
+
 const { sql, poolPromise } = require("../config/db");
 
-router.post("/", async (req, res) => {
+// 🔐 AUTH
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+
+  if (!header) {
+    return res.status(401).json({ erro: "Token não enviado" });
+  }
+
+  const token = header.split(" ")[1];
+
   try {
-    console.log("🔥 LOGIN CHEGOU:", req.body);
+    jwt.verify(token, "segredo");
+    next();
+  } catch (err) {
+    return res.status(401).json({ erro: "Token inválido" });
+  }
+}
 
-    const { email, senha } = req.body;
-
+// 🔥 LISTAR TURMAS
+router.get("/", auth, async (req, res) => {
+  try {
     const pool = await poolPromise;
 
     const result = await pool.request()
-      .input("email", sql.VarChar, email)
-      .input("senha", sql.VarChar, senha)
-      .query(`
-        SELECT * FROM usuarios 
-        WHERE email = @email AND senha = @senha
-      `);
+      .query("SELECT * FROM turmas");
 
-    if (result.recordset.length === 0) {
-      return res.status(401).json({ erro: "Credenciais inválidas" });
-    }
-
-    const token = jwt.sign(
-      { email },
-      "segredo",
-      { expiresIn: "8h" }
-    );
-
-    return res.json({ token });
+    res.json(result.recordset);
 
   } catch (err) {
-    console.log("🔥 ERRO LOGIN:", err);
-    return res.status(500).json({ erro: err.message });
+    console.log("🔥 ERRO LISTAR TURMAS:", err);
+    res.status(500).json({ erro: err.message });
   }
 });
 
-router.post("/register", async (req, res) => {
+// 🔥 CADASTRAR TURMA
+router.post("/", auth, async (req, res) => {
   try {
-    const { email, senha } = req.body;
-
-    if (!email || !senha) {
-      return res.status(400).json({ erro: "Email e senha são obrigatórios" });
-    }
+    const { nome, ano } = req.body;
 
     const pool = await poolPromise;
 
-    // Verifica se já existe
-    const check = await pool.request()
-      .input("email", sql.VarChar, email)
-      .query("SELECT * FROM usuarios WHERE email = @email");
-
-    if (check.recordset.length > 0) {
-      return res.status(400).json({ erro: "Usuário já existe" });
-    }
-
-    // Insere usuário
     await pool.request()
-      .input("email", sql.VarChar, email)
-      .input("senha", sql.VarChar, senha)
+      .input("nome", sql.VarChar, nome)
+      .input("ano", sql.Int, ano)
       .query(`
-        INSERT INTO usuarios (email, senha)
-        VALUES (@email, @senha)
+        INSERT INTO turmas (nome, ano)
+        VALUES (@nome, @ano)
       `);
 
-    // Gera token automático (login automático após cadastro)
-    const token = jwt.sign(
-      { email },
-      "segredo",
-      { expiresIn: "8h" }
-    );
-
-    return res.json({ token, email });
+    res.json({ ok: true });
 
   } catch (err) {
-    console.log("🔥 ERRO REGISTER:", err);
-    return res.status(500).json({ erro: err.message });
+    console.log("🔥 ERRO CADASTRAR TURMA:", err);
+    res.status(500).json({ erro: err.message });
   }
 });
 

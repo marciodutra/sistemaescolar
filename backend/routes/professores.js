@@ -1,82 +1,68 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
 
-const { sql, poolPromise } = require("../config/db");
-const auth = require("../middleware/auth");
+function auth(req, res, next) {
+  const header = req.headers.authorization;
 
-// protege todas rotas
-router.use(auth);
+  if (!header) {
+    return res.status(401).json({
+      erro: "Token não enviado"
+    });
+  }
 
-// 🔥 LISTAR PROFESSORES
-router.get("/", async (req, res) => {
+  const token = header.split(" ")[1];
+
   try {
-    const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM professores");
-    res.json(result.recordset);
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET || "segredo"
+    );
+
+    next();
+
+  } catch {
+    return res.status(401).json({
+      erro: "Token inválido"
+    });
+  }
+}
+
+router.get("/", auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM professores ORDER BY id DESC"
+    );
+
+    res.json(result.rows);
+
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    res.status(500).json({
+      erro: err.message
+    });
   }
 });
 
-// 🔥 CADASTRAR PROFESSOR
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const { nome, disciplina } = req.body;
 
-    const pool = await poolPromise;
-
-    await pool.request()
-      .input("nome", sql.VarChar, nome)
-      .input("disciplina", sql.VarChar, disciplina)
-      .query(`
-        INSERT INTO professores (nome, disciplina)
-        VALUES (@nome, @disciplina)
-      `);
-
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// 🔥 EDITAR PROFESSOR
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nome, disciplina } = req.body;
-
-    const pool = await poolPromise;
-
-    await pool.request()
-      .input("id", sql.Int, id)
-      .input("nome", sql.VarChar, nome)
-      .input("disciplina", sql.VarChar, disciplina)
-      .query(`
-        UPDATE professores
-        SET nome=@nome, disciplina=@disciplina
-        WHERE id=@id
-      `);
+    await pool.query(
+      `
+      INSERT INTO professores
+      (nome, disciplina)
+      VALUES($1,$2)
+      `,
+      [nome, disciplina]
+    );
 
     res.json({ ok: true });
+
   } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
-});
-
-// 🔥 DELETAR PROFESSOR
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const pool = await poolPromise;
-
-    await pool.request()
-      .input("id", sql.Int, id)
-      .query("DELETE FROM professores WHERE id=@id");
-
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
+    res.status(500).json({
+      erro: err.message
+    });
   }
 });
 
