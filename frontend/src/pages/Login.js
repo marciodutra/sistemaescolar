@@ -11,10 +11,13 @@ function Login() {
 
   async function entrar() {
     try {
-      const response = await axios.post("https://sistemaescolar-tkvc.onrender.com", {
-        email,
-        senha,
-      });
+      const response = await axios.post(
+        "https://sistemaescolar-tkvc.onrender.com/auth",
+        {
+          email,
+          senha,
+        }
+      );
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", email);
@@ -22,6 +25,12 @@ function Login() {
       window.location = "/dashboard";
     } catch (err) {
       console.log(err);
+
+      if (err.response) {
+        alert(err.response.data.erro || "Erro ao fazer login");
+      } else {
+        alert("Erro de conexão com o servidor");
+      }
     }
   }
 
@@ -54,10 +63,7 @@ function Login() {
           onChange={(e) => setSenha(e.target.value)}
         />
 
-        <button
-          className="btn btn-primary w-100"
-          onClick={entrar}
-        >
+        <button className="btn btn-primary w-100" onClick={entrar}>
           Entrar
         </button>
 
