@@ -10,6 +10,9 @@ function Turmas() {
   const [ano, setAno] = useState("");
   const [lista, setLista] = useState([]);
 
+  const [turmaAberta, setTurmaAberta] = useState(null);
+  const [alunosTurma, setAlunosTurma] = useState([]);
+
   async function carregar() {
     try {
       const response = await api.get("/turmas");
@@ -28,9 +31,31 @@ function Turmas() {
 
       setNome("");
       setAno("");
+
       carregar();
+
     } catch (err) {
       console.log("Erro ao salvar turma:", err);
+    }
+  }
+
+  async function verAlunos(id) {
+    try {
+      if (turmaAberta === id) {
+        setTurmaAberta(null);
+        setAlunosTurma([]);
+        return;
+      }
+
+      const response = await api.get(
+        `/matriculas/turma/${id}`
+      );
+
+      setTurmaAberta(id);
+      setAlunosTurma(response.data);
+
+    } catch (err) {
+      console.log("Erro ao carregar alunos da turma:", err);
     }
   }
 
@@ -44,7 +69,9 @@ function Turmas() {
         <div style={styles.card}>
 
           <div style={styles.header}>
-            <h1 style={styles.title}>Cadastro de Turmas</h1>
+            <h1 style={styles.title}>
+              Cadastro de Turmas
+            </h1>
 
             <button
               onClick={() => navigate("/dashboard")}
@@ -84,9 +111,50 @@ function Turmas() {
 
           <div style={styles.list}>
             {lista.map((t) => (
-              <div key={t.id} style={styles.item}>
-                <strong>{t.nome}</strong>
-                <span>{t.ano}</span>
+              <div key={t.id}>
+
+                <div style={styles.item}>
+                  <div>
+                    <strong>{t.nome}</strong>
+                    <br />
+                    <span>{t.ano}</span>
+                  </div>
+
+                  <button
+                    style={styles.viewButton}
+                    onClick={() => verAlunos(t.id)}
+                  >
+                    {turmaAberta === t.id
+                      ? "Ocultar alunos"
+                      : "Ver alunos"}
+                  </button>
+                </div>
+
+                {turmaAberta === t.id && (
+                  <div style={styles.alunosBox}>
+
+                    <strong>
+                      Alunos matriculados:
+                    </strong>
+
+                    {alunosTurma.length === 0 ? (
+                      <p>
+                        Nenhum aluno matriculado.
+                      </p>
+                    ) : (
+                      alunosTurma.map((a) => (
+                        <div
+                          key={a.id}
+                          style={styles.aluno}
+                        >
+                          👨‍🎓 {a.nome}
+                        </div>
+                      ))
+                    )}
+
+                  </div>
+                )}
+
               </div>
             ))}
           </div>
@@ -165,9 +233,31 @@ const styles = {
   item: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 12,
     background: "#f8fafc",
     borderRadius: 10,
+  },
+
+  viewButton: {
+    background: "#16a34a",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "8px 12px",
+    cursor: "pointer",
+  },
+
+  alunosBox: {
+    background: "#eef2ff",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 5,
+    marginBottom: 10,
+  },
+
+  aluno: {
+    padding: 5,
   },
 };
 

@@ -92,4 +92,30 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/turma/:id", auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT
+        a.id,
+        a.nome,
+        a.data_nascimento
+      FROM matriculas m
+      INNER JOIN alunos a
+        ON a.id = m.aluno_id
+      WHERE m.turma_id = $1
+      ORDER BY a.nome
+      `,
+      [req.params.id]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    res.status(500).json({
+      erro: err.message
+    });
+  }
+});
+
 module.exports = router;
