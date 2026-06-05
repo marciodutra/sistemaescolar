@@ -12,7 +12,7 @@ function Login() {
   async function entrar() {
     try {
       const response = await axios.post(
-        "https://sistemaescolar-tkvc.onrender.com/auth",
+        "https://sistemaescolar-tkvc.onrender.com/auth/login",
         {
           email,
           senha,
@@ -22,7 +22,8 @@ function Login() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", email);
 
-      window.location = "/dashboard";
+      navigate("/dashboard");
+
     } catch (err) {
       console.log(err);
 
