@@ -38,6 +38,12 @@ function Dashboard() {
           cor="#f97316"
           onClick={() => navigate("/turmas")}
         />
+
+        <Card
+          titulo="📝 Matrículas"
+          cor="#9333ea"
+          onClick={() => navigate("/matriculas")}
+        />
       </div>
 
       <div style={{ textAlign: "center", marginTop: 30 }}>

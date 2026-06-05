@@ -7,11 +7,13 @@ const authRoutes = require("./routes/auth");
 const alunosRoutes = require("./routes/alunos");
 const professoresRoutes = require("./routes/professores");
 const turmasRoutes = require("./routes/turmas");
+const matriculasRoutes = require("./routes/matriculas");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 
 // DEBUG
 app.use((req, res, next) => {
@@ -24,6 +26,7 @@ app.use("/auth", authRoutes);
 app.use("/alunos", alunosRoutes);
 app.use("/professores", professoresRoutes);
 app.use("/turmas", turmasRoutes);
+app.use("/matriculas", matriculasRoutes);
 
 // TESTE
 app.get("/", (req, res) => {
