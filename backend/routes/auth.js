@@ -1,3 +1,8 @@
+const express = require("express");
+const router = express.Router();
+const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
+
 router.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
@@ -39,3 +44,5 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({ erro: err.message });
   }
 });
+
+module.exports = router;
