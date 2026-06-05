@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 });
 
 // ROTAS
-app.use("/login", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/alunos", alunosRoutes);
 app.use("/professores", professoresRoutes);
 app.use("/turmas", turmasRoutes);
@@ -39,7 +39,6 @@ app.use((req, res) => {
   });
 });
 
-// PORTA DO RENDER
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
