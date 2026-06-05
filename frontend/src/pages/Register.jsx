@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
 function Register() {
+  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
@@ -12,8 +13,9 @@ function Register() {
   async function cadastrar() {
     try {
       const response = await axios.post(
-        "https://sistemaescolar-tkvc.onrender.com/login/register",
+        "https://sistemaescolar-tkvc.onrender.com/auth/register",
         {
+          nome,
           email,
           senha,
         }
@@ -21,6 +23,7 @@ function Register() {
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", response.data.email);
+      localStorage.setItem("nome", response.data.nome);
 
       navigate("/dashboard");
     } catch (err) {
@@ -41,6 +44,13 @@ function Register() {
         }}
       >
         <h2 className="text-center mb-4">Criar Conta</h2>
+
+        <input
+          className="form-control mb-3"
+          placeholder="Nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+        />
 
         <input
           className="form-control mb-3"
