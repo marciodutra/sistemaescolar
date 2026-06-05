@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const email = localStorage.getItem("email");
+  const nome = localStorage.getItem("nome") || "Usuário";
 
   function handleLogout() {
     localStorage.clear();
@@ -11,7 +11,7 @@ function Dashboard() {
   }
 
   return (
-    <Layout titulo={`Logado como ${email}`}>
+    <Layout titulo={nome ? `Logado como ${nome}` : ""}>
       <div
         style={{
           display: "flex",

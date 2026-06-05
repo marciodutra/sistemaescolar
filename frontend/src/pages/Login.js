@@ -10,6 +10,13 @@ function Login() {
   const navigate = useNavigate();
 
   async function entrar() {
+    console.log("🔥 Botão de login clicado");
+
+    if (!email || !senha) {
+      alert("Preencha email e senha");
+      return;
+    }
+
     try {
       const response = await axios.post(
         "https://sistemaescolar-tkvc.onrender.com/auth/login",
@@ -19,13 +26,25 @@ function Login() {
         }
       );
 
+      console.log("RAW RESPONSE:", response.data);
+console.log("NOME:", response.data.nome);
+
+      console.log("✅ RESPOSTA LOGIN:", response.data);
+
+      // segurança: limpa antes
+      localStorage.clear();
+
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("email", email);
+      localStorage.setItem("email", response.data.email || "");
+      localStorage.setItem("nome", response.data.nome || "");
+      localStorage.setItem("perfil", response.data.perfil || "usuario");
+
+      console.log("💾 localStorage atualizado");
 
       navigate("/dashboard");
 
     } catch (err) {
-      console.log(err);
+      console.log("❌ ERRO LOGIN:", err);
 
       if (err.response) {
         alert(err.response.data.erro || "Erro ao fazer login");
@@ -64,7 +83,10 @@ function Login() {
           onChange={(e) => setSenha(e.target.value)}
         />
 
-        <button className="btn btn-primary w-100" onClick={entrar}>
+        <button
+          className="btn btn-primary w-100"
+          onClick={entrar}
+        >
           Entrar
         </button>
 

@@ -1,76 +1,41 @@
-const express = require("express");
-const router = express.Router();
-const jwt = require("jsonwebtoken");
-const pool = require("../config/db");
-
-// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
 
     const result = await pool.query(
-      "SELECT * FROM usuarios WHERE email = $1 AND senha = $2",
+      `
+      SELECT id, email, nome, perfil
+      FROM usuarios
+      WHERE email = $1 AND senha = $2
+      `,
       [email, senha]
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({
-        erro: "Credenciais inválidas"
-      });
+      return res.status(401).json({ erro: "Credenciais inválidas" });
     }
 
+    const usuario = result.rows[0];
+
     const token = jwt.sign(
-      { email },
+      {
+        id: usuario.id,
+        email: usuario.email,
+        nome: usuario.nome,
+        perfil: usuario.perfil
+      },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
 
-    res.json({ token });
-
-  } catch (err) {
-    res.status(500).json({
-      erro: err.message
-    });
-  }
-});
-
-// REGISTER
-router.post("/register", async (req, res) => {
-  try {
-    const { email, senha } = req.body;
-
-    const existe = await pool.query(
-      "SELECT * FROM usuarios WHERE email = $1",
-      [email]
-    );
-
-    if (existe.rows.length > 0) {
-      return res.status(400).json({
-        erro: "Usuário já existe"
-      });
-    }
-
-    await pool.query(
-      "INSERT INTO usuarios(email, senha) VALUES($1,$2)",
-      [email, senha]
-    );
-
-    const token = jwt.sign(
-      { email },
-      process.env.JWT_SECRET,
-      { expiresIn: "8h" }
-    );
-
-    res.json({
+    return res.json({
       token,
-      email
+      email: usuario.email,
+      nome: usuario.nome,
+      perfil: usuario.perfil
     });
 
   } catch (err) {
-    res.status(500).json({
-      erro: err.message
-    });
+    return res.status(500).json({ erro: err.message });
   }
 });
-
-module.exports = router;
