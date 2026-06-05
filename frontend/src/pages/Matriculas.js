@@ -1,141 +1,158 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 export default function Matriculas() {
 
-  const [alunos, setAlunos] = useState([]);
-  const [turmas, setTurmas] = useState([]);
-  const [matriculas, setMatriculas] = useState([]);
+    const [alunos, setAlunos] = useState([]);
+    const [turmas, setTurmas] = useState([]);
+    const [matriculas, setMatriculas] = useState([]);
 
-  const [alunoId, setAlunoId] = useState("");
-  const [turmaId, setTurmaId] = useState("");
+    const [alunoId, setAlunoId] = useState("");
+    const [turmaId, setTurmaId] = useState("");
 
-  async function carregarDados() {
+    async function carregarDados() {
 
-    const alunosRes = await api.get("/alunos");
-    const turmasRes = await api.get("/turmas");
-    const matriculasRes = await api.get("/matriculas");
+        const alunosRes = await api.get("/alunos");
+        const turmasRes = await api.get("/turmas");
+        const matriculasRes = await api.get("/matriculas");
+        const navigate = useNavigate();
 
-    setAlunos(alunosRes.data);
-    setTurmas(turmasRes.data);
-    setMatriculas(matriculasRes.data);
-  }
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
-  async function salvar(e) {
-    e.preventDefault();
-
-    await api.post("/matriculas", {
-      aluno_id: alunoId,
-      turma_id: turmaId
-    });
-
-    setAlunoId("");
-    setTurmaId("");
-
-    carregarDados();
-  }
-
-  async function excluir(id) {
-
-    if (!window.confirm("Excluir matrícula?")) {
-      return;
+        setAlunos(alunosRes.data);
+        setTurmas(turmasRes.data);
+        setMatriculas(matriculasRes.data);
     }
 
-    await api.delete(`/matriculas/${id}`);
+    useEffect(() => {
+        carregarDados();
+    }, []);
 
-    carregarDados();
-  }
+    async function salvar(e) {
+        e.preventDefault();
 
-  return (
-    <div className="container mt-4">
+        await api.post("/matriculas", {
+            aluno_id: alunoId,
+            turma_id: turmaId
+        });
 
-      <h2>Matrículas</h2>
+        setAlunoId("");
+        setTurmaId("");
 
-      <form onSubmit={salvar}>
+        carregarDados();
+    }
 
-        <select
-          className="form-control mb-2"
-          value={alunoId}
-          onChange={(e) => setAlunoId(e.target.value)}
-          required
-        >
-          <option value="">
-            Selecione o aluno
-          </option>
+    async function excluir(id) {
 
-          {alunos.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.nome}
-            </option>
-          ))}
-        </select>
+        if (!window.confirm("Excluir matrícula?")) {
+            return;
+        }
 
-        <select
-          className="form-control mb-2"
-          value={turmaId}
-          onChange={(e) => setTurmaId(e.target.value)}
-          required
-        >
-          <option value="">
-            Selecione a turma
-          </option>
+        await api.delete(`/matriculas/${id}`);
 
-          {turmas.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.nome} - {t.ano}
-            </option>
-          ))}
-        </select>
+        carregarDados();
+    }
 
-        <button
-          className="btn btn-primary"
-          type="submit"
-        >
-          Matricular
-        </button>
+    return (
+        <div className="container mt-4">
 
-      </form>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 20,
+                }}
+            >
+                <h2>Matrículas</h2>
 
-      <hr />
-
-      <table className="table">
-
-        <thead>
-          <tr>
-            <th>Aluno</th>
-            <th>Turma</th>
-            <th>Ano</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {matriculas.map((m) => (
-            <tr key={m.id}>
-              <td>{m.aluno}</td>
-              <td>{m.turma}</td>
-              <td>{m.ano}</td>
-
-              <td>
                 <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => excluir(m.id)}
+                    className="btn btn-secondary"
+                    onClick={() => navigate("/dashboard")}
                 >
-                  Excluir
+                    ← Voltar
                 </button>
-              </td>
-            </tr>
-          ))}
+            </div>
+            <form onSubmit={salvar}>
 
-        </tbody>
+                <select
+                    className="form-control mb-2"
+                    value={alunoId}
+                    onChange={(e) => setAlunoId(e.target.value)}
+                    required
+                >
+                    <option value="">
+                        Selecione o aluno
+                    </option>
 
-      </table>
+                    {alunos.map((a) => (
+                        <option key={a.id} value={a.id}>
+                            {a.nome}
+                        </option>
+                    ))}
+                </select>
 
-    </div>
-  );
+                <select
+                    className="form-control mb-2"
+                    value={turmaId}
+                    onChange={(e) => setTurmaId(e.target.value)}
+                    required
+                >
+                    <option value="">
+                        Selecione a turma
+                    </option>
+
+                    {turmas.map((t) => (
+                        <option key={t.id} value={t.id}>
+                            {t.nome} - {t.ano}
+                        </option>
+                    ))}
+                </select>
+
+                <button
+                    className="btn btn-primary"
+                    type="submit"
+                >
+                    Matricular
+                </button>
+
+            </form>
+
+            <hr />
+
+            <table className="table">
+
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Turma</th>
+                        <th>Ano</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {matriculas.map((m) => (
+                        <tr key={m.id}>
+                            <td>{m.aluno}</td>
+                            <td>{m.turma}</td>
+                            <td>{m.ano}</td>
+
+                            <td>
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => excluir(m.id)}
+                                >
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    );
 }
