@@ -10,6 +10,12 @@ function Alunos() {
   const [dataNascimento, setDataNascimento] = useState("");
   const [lista, setLista] = useState([]);
 
+  function formatarData(dataISO) {
+    if (!dataISO) return "";
+
+    return new Date(dataISO).toLocaleDateString("pt-BR");
+  }
+
   async function carregar() {
     try {
       const response = await api.get("/alunos");
@@ -42,7 +48,7 @@ function Alunos() {
     <Layout titulo="Cadastro de Alunos">
       <div style={styles.container}>
         <div style={styles.card}>
-
+          
           <div style={styles.header}>
             <h1 style={{ margin: 0 }}>Cadastro de Alunos</h1>
 
@@ -69,10 +75,7 @@ function Alunos() {
               onChange={(e) => setDataNascimento(e.target.value)}
             />
 
-            <button
-              style={styles.saveButton}
-              onClick={salvar}
-            >
+            <button style={styles.saveButton} onClick={salvar}>
               Salvar aluno
             </button>
           </div>
@@ -85,7 +88,7 @@ function Alunos() {
             {lista.map((aluno) => (
               <div key={aluno.id} style={styles.item}>
                 <strong>{aluno.nome}</strong>
-                <span>{aluno.data_nascimento}</span>
+                <span>{formatarData(aluno.data_nascimento)}</span>
               </div>
             ))}
           </div>
