@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
@@ -36,7 +37,7 @@ export default function Matriculas() {
 
     try {
       if (!alunoId || !turmaId) {
-        window.alert("Selecione aluno e turma!");
+        toast.warning("Selecione aluno e turma!");
         return;
       }
 
@@ -45,12 +46,12 @@ export default function Matriculas() {
         turma_id: turmaId,
       });
 
-      window.alert("✅ Matrícula realizada com sucesso!");
+      toast.success("✅ Matrícula realizada com sucesso!");
       setAlunoId("");
       setTurmaId("");
       carregarDados();
     } catch (err) {
-      window.alert("❌ Erro ao matricular: " + err.message);
+      toast.error("❌ Erro ao matricular: " + err.message);
       console.log("Erro ao matricular:", err);
     }
   }
@@ -62,10 +63,10 @@ export default function Matriculas() {
 
     try {
       await api.delete(`/matriculas/${id}`);
-      window.alert("✅ Matrícula excluída com sucesso!");
+      toast.success("✅ Matrícula excluída com sucesso!");
       carregarDados();
     } catch (err) {
-      window.alert("❌ Erro ao excluir matrícula: " + err.message);
+      toast.error("❌ Erro ao excluir matrícula: " + err.message);
       console.log("Erro ao excluir matrícula:", err);
     }
   }

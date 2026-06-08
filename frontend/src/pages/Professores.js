@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
@@ -23,7 +24,7 @@ function Professores() {
   async function salvar() {
     try {
       if (!nome || !disciplina) {
-        window.alert("Preencha todos os campos!");
+        toast.warning("Preencha todos os campos!");
         return;
       }
 
@@ -32,13 +33,13 @@ function Professores() {
           nome,
           disciplina,
         });
-        window.alert("✅ Professor atualizado com sucesso!");
+        toast.success("✅ Professor atualizado com sucesso!");
       } else {
         await api.post("/professores", {
           nome,
           disciplina,
         });
-        window.alert("✅ Professor adicionado com sucesso!");
+        toast.success("✅ Professor adicionado com sucesso!");
       }
 
       setNome("");
@@ -46,7 +47,7 @@ function Professores() {
       setProfessoresEmEdicao(null);
       carregar();
     } catch (err) {
-      window.alert("❌ Erro ao salvar professor: " + err.message);
+      toast.error("❌ Erro ao salvar professor: " + err.message);
       console.log("Erro ao salvar professor:", err);
     }
   }
@@ -64,10 +65,10 @@ function Professores() {
 
     try {
       await api.delete(`/professores/${id}`);
-      window.alert("✅ Professor excluído com sucesso!");
+      toast.success("✅ Professor excluído com sucesso!");
       carregar();
     } catch (err) {
-      window.alert("❌ Erro ao excluir professor: " + err.message);
+      toast.error("❌ Erro ao excluir professor: " + err.message);
       console.log("Erro ao excluir professor:", err);
     }
   }

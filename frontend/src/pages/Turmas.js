@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
@@ -26,7 +27,7 @@ function Turmas() {
   async function salvar() {
     try {
       if (!nome || !ano) {
-        window.alert("Preencha todos os campos!");
+        toast.warning("Preencha todos os campos!");
         return;
       }
 
@@ -35,13 +36,13 @@ function Turmas() {
           nome,
           ano: Number(ano),
         });
-        window.alert("✅ Turma atualizada com sucesso!");
+        toast.success("✅ Turma atualizada com sucesso!");
       } else {
         await api.post("/turmas", {
           nome,
           ano: Number(ano),
         });
-        window.alert("✅ Turma adicionada com sucesso!");
+        toast.success("✅ Turma adicionada com sucesso!");
       }
 
       setNome("");
@@ -50,7 +51,7 @@ function Turmas() {
       carregar();
 
     } catch (err) {
-      window.alert("❌ Erro ao salvar turma: " + err.message);
+      toast.error("❌ Erro ao salvar turma: " + err.message);
       console.log("Erro ao salvar turma:", err);
     }
   }
@@ -88,10 +89,10 @@ function Turmas() {
 
     try {
       await api.delete(`/turmas/${id}`);
-      window.alert("✅ Turma excluída com sucesso!");
+      toast.success("✅ Turma excluída com sucesso!");
       carregar();
     } catch (err) {
-      window.alert("❌ Erro ao excluir turma: " + err.message);
+      toast.error("❌ Erro ao excluir turma: " + err.message);
       console.log("Erro ao excluir turma:", err);
     }
   }
