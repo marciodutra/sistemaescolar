@@ -35,29 +35,37 @@ export default function Matriculas() {
     e.preventDefault();
 
     try {
+      if (!alunoId || !turmaId) {
+        window.alert("Selecione aluno e turma!");
+        return;
+      }
+
       await api.post("/matriculas", {
         aluno_id: alunoId,
         turma_id: turmaId,
       });
 
+      window.alert("✅ Matrícula realizada com sucesso!");
       setAlunoId("");
       setTurmaId("");
-
       carregarDados();
     } catch (err) {
+      window.alert("❌ Erro ao matricular: " + err.message);
       console.log("Erro ao matricular:", err);
     }
   }
 
   async function excluir(id) {
-    if (!window.confirm("Excluir matrícula?")) {
+    if (!window.confirm("Tem certeza que deseja excluir esta matrícula?")) {
       return;
     }
 
     try {
       await api.delete(`/matriculas/${id}`);
+      window.alert("✅ Matrícula excluída com sucesso!");
       carregarDados();
     } catch (err) {
+      window.alert("❌ Erro ao excluir matrícula: " + err.message);
       console.log("Erro ao excluir matrícula:", err);
     }
   }

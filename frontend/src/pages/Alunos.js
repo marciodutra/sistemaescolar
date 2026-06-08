@@ -28,16 +28,23 @@ function Alunos() {
 
   async function salvar() {
     try {
+      if (!nome || !dataNascimento) {
+        window.alert("Preencha todos os campos!");
+        return;
+      }
+
       if (alunoEmEdicao) {
         await api.put(`/alunos/${alunoEmEdicao.id}`, {
           nome,
           data_nascimento: dataNascimento,
         });
+        window.alert("✅ Aluno atualizado com sucesso!");
       } else {
         await api.post("/alunos", {
           nome,
           data_nascimento: dataNascimento,
         });
+        window.alert("✅ Aluno adicionado com sucesso!");
       }
 
       setNome("");
@@ -45,6 +52,7 @@ function Alunos() {
       setAlunoEmEdicao(null);
       carregar();
     } catch (err) {
+      window.alert("❌ Erro ao salvar aluno: " + err.message);
       console.log("Erro ao salvar aluno:", err);
     }
   }
@@ -56,14 +64,16 @@ function Alunos() {
   }
 
   async function excluir(id) {
-    if (!window.confirm("Excluir aluno?")) {
+    if (!window.confirm("Tem certeza que deseja excluir este aluno?")) {
       return;
     }
 
     try {
       await api.delete(`/alunos/${id}`);
+      window.alert("✅ Aluno excluído com sucesso!");
       carregar();
     } catch (err) {
+      window.alert("❌ Erro ao excluir aluno: " + err.message);
       console.log("Erro ao excluir aluno:", err);
     }
   }

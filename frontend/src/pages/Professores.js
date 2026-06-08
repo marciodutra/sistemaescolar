@@ -22,16 +22,23 @@ function Professores() {
 
   async function salvar() {
     try {
+      if (!nome || !disciplina) {
+        window.alert("Preencha todos os campos!");
+        return;
+      }
+
       if (professoresEmEdicao) {
         await api.put(`/professores/${professoresEmEdicao.id}`, {
           nome,
           disciplina,
         });
+        window.alert("✅ Professor atualizado com sucesso!");
       } else {
         await api.post("/professores", {
           nome,
           disciplina,
         });
+        window.alert("✅ Professor adicionado com sucesso!");
       }
 
       setNome("");
@@ -39,6 +46,7 @@ function Professores() {
       setProfessoresEmEdicao(null);
       carregar();
     } catch (err) {
+      window.alert("❌ Erro ao salvar professor: " + err.message);
       console.log("Erro ao salvar professor:", err);
     }
   }
@@ -50,14 +58,16 @@ function Professores() {
   }
 
   async function excluir(id) {
-    if (!window.confirm("Excluir professor?")) {
+    if (!window.confirm("Tem certeza que deseja excluir este professor?")) {
       return;
     }
 
     try {
       await api.delete(`/professores/${id}`);
+      window.alert("✅ Professor excluído com sucesso!");
       carregar();
     } catch (err) {
+      window.alert("❌ Erro ao excluir professor: " + err.message);
       console.log("Erro ao excluir professor:", err);
     }
   }
