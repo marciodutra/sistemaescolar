@@ -64,4 +64,42 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const { nome, ano } = req.body;
+
+    await pool.query(
+      `
+      UPDATE turmas
+      SET nome = $1, ano = $2
+      WHERE id = $3
+      `,
+      [nome, ano, req.params.id]
+    );
+
+    res.json({ ok: true });
+
+  } catch (err) {
+    res.status(500).json({
+      erro: err.message
+    });
+  }
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    await pool.query(
+      "DELETE FROM turmas WHERE id = $1",
+      [req.params.id]
+    );
+
+    res.json({ ok: true });
+
+  } catch (err) {
+    res.status(500).json({
+      erro: err.message
+    });
+  }
+});
+
 module.exports = router;

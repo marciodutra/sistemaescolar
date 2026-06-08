@@ -9,6 +9,7 @@ function Alunos() {
   const [nome, setNome] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
   const [lista, setLista] = useState([]);
+  const [alunoEmEdicao, setAlunoEmEdicao] = useState(null);
 
   function formatarData(dataISO) {
     if (!dataISO) return "";
@@ -27,17 +28,50 @@ function Alunos() {
 
   async function salvar() {
     try {
-      await api.post("/alunos", {
-        nome,
-        data_nascimento: dataNascimento,
-      });
+      if (alunoEmEdicao) {
+        await api.put(`/alunos/${alunoEmEdicao.id}`, {
+          nome,
+          data_nascimento: dataNascimento,
+        });
+      } else {
+        await api.post("/alunos", {
+          nome,
+          data_nascimento: dataNascimento,
+        });
+      }
 
       setNome("");
       setDataNascimento("");
+      setAlunoEmEdicao(null);
       carregar();
     } catch (err) {
       console.log("Erro ao salvar aluno:", err);
     }
+  }
+
+  async function editar(aluno) {
+    setAlunoEmEdicao(aluno);
+    setNome(aluno.nome);
+    setDataNascimento(aluno.data_nascimento.split('T')[0]);
+  }
+
+  async function excluir(id) {
+    if (!window.confirm("Excluir aluno?")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/alunos/${id}`);
+      carregar();
+    } catch (err) {
+      console.log("Erro ao excluir aluno:", err);
+    }
+  }
+
+  function cancelarEdicao() {
+    setAlunoEmEdicao(null);
+    setNome("");
+    setDataNascimento("");
   }
 
   useEffect(() => {
@@ -50,7 +84,9 @@ function Alunos() {
         <div style={styles.card}>
           
           <div style={styles.header}>
-            <h1 style={{ margin: 0 }}>Cadastro de Alunos</h1>
+            <h1 style={{ margin: 0 }}>
+              {alunoEmEdicao ? "Editar Aluno" : "Cadastro de Alunos"}
+            </h1>
 
             <button
               style={styles.backButton}
@@ -75,9 +111,19 @@ function Alunos() {
               onChange={(e) => setDataNascimento(e.target.value)}
             />
 
-            <button style={styles.saveButton} onClick={salvar}>
-              Salvar aluno
-            </button>
+            <div style={styles.buttonGroup}>
+              <button style={styles.saveButton} onClick={salvar}>
+                {alunoEmEdicao ? "Atualizar" : "Salvar aluno"}
+              </button>
+              {alunoEmEdicao && (
+                <button
+                  style={styles.cancelButton}
+                  onClick={cancelarEdicao}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
 
           <hr style={{ margin: "20px 0" }} />
@@ -87,8 +133,24 @@ function Alunos() {
           <div style={styles.list}>
             {lista.map((aluno) => (
               <div key={aluno.id} style={styles.item}>
-                <strong>{aluno.nome}</strong>
-                <span>{formatarData(aluno.data_nascimento)}</span>
+                <div>
+                  <strong>{aluno.nome}</strong>
+                  <span> • {formatarData(aluno.data_nascimento)}</span>
+                </div>
+                <div style={styles.itemActions}>
+                  <button
+                    style={styles.editButton}
+                    onClick={() => editar(aluno)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    style={styles.deleteButton}
+                    onClick={() => excluir(aluno.id)}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -144,10 +206,27 @@ const styles = {
     fontSize: 14,
   },
 
+  buttonGroup: {
+    display: "flex",
+    gap: 10,
+  },
+
   saveButton: {
+    flex: 1,
     padding: 12,
     backgroundColor: "#2563eb",
     color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "#cbd5e1",
+    color: "#000",
     border: "none",
     borderRadius: 10,
     cursor: "pointer",
@@ -163,9 +242,37 @@ const styles = {
   item: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 12,
     backgroundColor: "#f8fafc",
     borderRadius: 10,
+  },
+
+  itemActions: {
+    display: "flex",
+    gap: 8,
+  },
+
+  editButton: {
+    padding: "6px 12px",
+    backgroundColor: "#16a34a",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+  deleteButton: {
+    padding: "6px 12px",
+    backgroundColor: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 };
 

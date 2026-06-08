@@ -66,4 +66,42 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const { nome, disciplina } = req.body;
+
+    await pool.query(
+      `
+      UPDATE professores
+      SET nome = $1, disciplina = $2
+      WHERE id = $3
+      `,
+      [nome, disciplina, req.params.id]
+    );
+
+    res.json({ ok: true });
+
+  } catch (err) {
+    res.status(500).json({
+      erro: err.message
+    });
+  }
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    await pool.query(
+      "DELETE FROM professores WHERE id = $1",
+      [req.params.id]
+    );
+
+    res.json({ ok: true });
+
+  } catch (err) {
+    res.status(500).json({
+      erro: err.message
+    });
+  }
+});
+
 module.exports = router;

@@ -12,6 +12,7 @@ function Turmas() {
 
   const [turmaAberta, setTurmaAberta] = useState(null);
   const [alunosTurma, setAlunosTurma] = useState([]);
+  const [turmaEmEdicao, setTurmaEmEdicao] = useState(null);
 
   async function carregar() {
     try {
@@ -24,14 +25,21 @@ function Turmas() {
 
   async function salvar() {
     try {
-      await api.post("/turmas", {
-        nome,
-        ano: Number(ano),
-      });
+      if (turmaEmEdicao) {
+        await api.put(`/turmas/${turmaEmEdicao.id}`, {
+          nome,
+          ano: Number(ano),
+        });
+      } else {
+        await api.post("/turmas", {
+          nome,
+          ano: Number(ano),
+        });
+      }
 
       setNome("");
       setAno("");
-
+      setTurmaEmEdicao(null);
       carregar();
 
     } catch (err) {
@@ -59,6 +67,31 @@ function Turmas() {
     }
   }
 
+  async function editar(turma) {
+    setTurmaEmEdicao(turma);
+    setNome(turma.nome);
+    setAno(turma.ano.toString());
+  }
+
+  async function excluir(id) {
+    if (!window.confirm("Excluir turma?")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/turmas/${id}`);
+      carregar();
+    } catch (err) {
+      console.log("Erro ao excluir turma:", err);
+    }
+  }
+
+  function cancelarEdicao() {
+    setTurmaEmEdicao(null);
+    setNome("");
+    setAno("");
+  }
+
   useEffect(() => {
     carregar();
   }, []);
@@ -70,7 +103,7 @@ function Turmas() {
 
           <div style={styles.header}>
             <h1 style={styles.title}>
-              Cadastro de Turmas
+              {turmaEmEdicao ? "Editar Turma" : "Cadastro de Turmas"}
             </h1>
 
             <button
@@ -97,12 +130,22 @@ function Turmas() {
               style={styles.input}
             />
 
-            <button
-              onClick={salvar}
-              style={styles.saveButton}
-            >
-              Salvar turma
-            </button>
+            <div style={styles.buttonGroup}>
+              <button
+                onClick={salvar}
+                style={styles.saveButton}
+              >
+                {turmaEmEdicao ? "Atualizar" : "Salvar turma"}
+              </button>
+              {turmaEmEdicao && (
+                <button
+                  style={styles.cancelButton}
+                  onClick={cancelarEdicao}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
 
           <hr style={{ margin: "20px 0" }} />
@@ -120,14 +163,28 @@ function Turmas() {
                     <span>{t.ano}</span>
                   </div>
 
-                  <button
-                    style={styles.viewButton}
-                    onClick={() => verAlunos(t.id)}
-                  >
-                    {turmaAberta === t.id
-                      ? "Ocultar alunos"
-                      : "Ver alunos"}
-                  </button>
+                  <div style={styles.itemActions}>
+                    <button
+                      style={styles.editButton}
+                      onClick={() => editar(t)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      style={styles.deleteButton}
+                      onClick={() => excluir(t.id)}
+                    >
+                      Excluir
+                    </button>
+                    <button
+                      style={styles.viewButton}
+                      onClick={() => verAlunos(t.id)}
+                    >
+                      {turmaAberta === t.id
+                        ? "Ocultar alunos"
+                        : "Ver alunos"}
+                    </button>
+                  </div>
                 </div>
 
                 {turmaAberta === t.id && (
@@ -214,10 +271,27 @@ const styles = {
     fontSize: 14,
   },
 
+  buttonGroup: {
+    display: "flex",
+    gap: 10,
+  },
+
   saveButton: {
+    flex: 1,
     padding: 12,
     background: "#2563eb",
     color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "#cbd5e1",
+    color: "#000",
     border: "none",
     borderRadius: 10,
     cursor: "pointer",
@@ -239,13 +313,42 @@ const styles = {
     borderRadius: 10,
   },
 
-  viewButton: {
-    background: "#16a34a",
+  itemActions: {
+    display: "flex",
+    gap: 8,
+  },
+
+  editButton: {
+    padding: "6px 12px",
+    backgroundColor: "#16a34a",
     color: "#fff",
     border: "none",
     borderRadius: 8,
-    padding: "8px 12px",
     cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+  deleteButton: {
+    padding: "6px 12px",
+    backgroundColor: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+  viewButton: {
+    background: "#06b6d4",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "6px 12px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 
   alunosBox: {

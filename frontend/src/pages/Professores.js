@@ -9,6 +9,7 @@ function Professores() {
   const [nome, setNome] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [lista, setLista] = useState([]);
+  const [professoresEmEdicao, setProfessoresEmEdicao] = useState(null);
 
   async function carregar() {
     try {
@@ -21,17 +22,50 @@ function Professores() {
 
   async function salvar() {
     try {
-      await api.post("/professores", {
-        nome,
-        disciplina,
-      });
+      if (professoresEmEdicao) {
+        await api.put(`/professores/${professoresEmEdicao.id}`, {
+          nome,
+          disciplina,
+        });
+      } else {
+        await api.post("/professores", {
+          nome,
+          disciplina,
+        });
+      }
 
       setNome("");
       setDisciplina("");
+      setProfessoresEmEdicao(null);
       carregar();
     } catch (err) {
       console.log("Erro ao salvar professor:", err);
     }
+  }
+
+  async function editar(prof) {
+    setProfessoresEmEdicao(prof);
+    setNome(prof.nome);
+    setDisciplina(prof.disciplina);
+  }
+
+  async function excluir(id) {
+    if (!window.confirm("Excluir professor?")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/professores/${id}`);
+      carregar();
+    } catch (err) {
+      console.log("Erro ao excluir professor:", err);
+    }
+  }
+
+  function cancelarEdicao() {
+    setProfessoresEmEdicao(null);
+    setNome("");
+    setDisciplina("");
   }
 
   useEffect(() => {
@@ -44,7 +78,9 @@ function Professores() {
         <div style={styles.card}>
 
           <div style={styles.header}>
-            <h1 style={{ margin: 0 }}>Cadastro de Professores</h1>
+            <h1 style={{ margin: 0 }}>
+              {professoresEmEdicao ? "Editar Professor" : "Cadastro de Professores"}
+            </h1>
 
             <button
               style={styles.backButton}
@@ -69,12 +105,22 @@ function Professores() {
               onChange={(e) => setDisciplina(e.target.value)}
             />
 
-            <button
-              style={styles.saveButton}
-              onClick={salvar}
-            >
-              Salvar professor
-            </button>
+            <div style={styles.buttonGroup}>
+              <button
+                style={styles.saveButton}
+                onClick={salvar}
+              >
+                {professoresEmEdicao ? "Atualizar" : "Salvar professor"}
+              </button>
+              {professoresEmEdicao && (
+                <button
+                  style={styles.cancelButton}
+                  onClick={cancelarEdicao}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
 
           <hr style={{ margin: "20px 0" }} />
@@ -84,8 +130,24 @@ function Professores() {
           <div style={styles.list}>
             {lista.map((prof) => (
               <div key={prof.id} style={styles.item}>
-                <strong>{prof.nome}</strong>
-                <span>{prof.disciplina}</span>
+                <div>
+                  <strong>{prof.nome}</strong>
+                  <span> • {prof.disciplina}</span>
+                </div>
+                <div style={styles.itemActions}>
+                  <button
+                    style={styles.editButton}
+                    onClick={() => editar(prof)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    style={styles.deleteButton}
+                    onClick={() => excluir(prof.id)}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -141,7 +203,13 @@ const styles = {
     fontSize: 14,
   },
 
+  buttonGroup: {
+    display: "flex",
+    gap: 10,
+  },
+
   saveButton: {
+    flex: 1,
     padding: 12,
     backgroundColor: "#2563eb",
     color: "#fff",
@@ -149,6 +217,17 @@ const styles = {
     borderRadius: 10,
     fontWeight: "bold",
     cursor: "pointer",
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: "#cbd5e1",
+    color: "#000",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 
   list: {
@@ -160,9 +239,37 @@ const styles = {
   item: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 12,
     backgroundColor: "#f8fafc",
     borderRadius: 10,
+  },
+
+  itemActions: {
+    display: "flex",
+    gap: 8,
+  },
+
+  editButton: {
+    padding: "6px 12px",
+    backgroundColor: "#16a34a",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+  deleteButton: {
+    padding: "6px 12px",
+    backgroundColor: "#dc2626",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 };
 
