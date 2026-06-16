@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
+const upload = require("../middleware/upload");
 
 const auth = require("../middleware/auth");
 const authorize = require("../middleware/authorize");
@@ -70,32 +71,79 @@ router.post(
   "/",
   auth,
   authorize("admin", "secretaria"),
+  upload.single("foto"),
   async (req, res) => {
     try {
-      const {
-        nome,
-        data_nascimento,
-        email,
-        senha
-      } = req.body;
 
+      const foto = req.file ? req.file.path : null;
+
+      const {
+  nome,
+  responsavel,
+  cpf,
+  rg,
+  data_nascimento,
+  sexo,
+  telefone,
+  logradouro,
+  numero,
+  bairro,
+  cidade,
+  estado,
+  cep,
+  email,
+  senha
+} = req.body;
+
+      // Cadastra o aluno
       const alunoResult = await pool.query(
         `
         INSERT INTO alunos (
           nome,
-          data_nascimento
+          responsavel,
+          cpf,
+          rg,
+          data_nascimento,
+          sexo,
+          telefone,
+          logradouro,
+          numero,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          foto,
+          email
         )
-        VALUES ($1,$2)
+        VALUES (
+          $1,$2,$3,$4,$5,
+          $6,$7,$8,$9,$10,
+          $11,$12,$13,$14,$15
+        )
         RETURNING id
         `,
-        [nome, data_nascimento]
+        [
+          nome,
+          responsavel,
+          cpf,
+          rg,
+          data_nascimento,
+          sexo,
+          telefone,
+          logradouro,
+          numero,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          foto,
+          email
+        ]
       );
 
-      const aluno_id =
-        alunoResult.rows[0].id;
+      const aluno_id = alunoResult.rows[0].id;
 
-      const senhaHash =
-        await bcrypt.hash(senha, 10);
+      const senhaHash = await bcrypt.hash(senha, 10);
 
       await pool.query(
         `
@@ -123,9 +171,13 @@ router.post(
       });
 
     } catch (err) {
+
+      console.error(err);
+
       res.status(500).json({
         erro: err.message
       });
+
     }
   }
 );
@@ -136,36 +188,89 @@ router.put(
   "/:id",
   auth,
   authorize("admin", "secretaria"),
+  upload.single("foto"),
   async (req, res) => {
     try {
+
+      // 🔥 GARANTE QUE NÃO QUEBRA SE VIER VAZIO
       const {
-        nome,
-        data_nascimento
-      } = req.body;
+        nome = "",
+        responsavel = "",
+        cpf = "",
+        rg = "",
+        data_nascimento = "",
+        sexo = "",
+        telefone = "",
+        logradouro = "",
+        numero = "",
+        bairro = "",
+        cidade = "",
+        estado = "",
+        cep = "",
+        email = "",
+        ativo = true
+      } = req.body || {};
+
+      const foto = req.file ? req.file.path : null;
 
       await pool.query(
         `
         UPDATE alunos
         SET
           nome = $1,
-          data_nascimento = $2
-        WHERE id = $3
+          responsavel = $2,
+          cpf = $3,
+          rg = $4,
+          data_nascimento = $5,
+          sexo = $6,
+          telefone = $7,
+          logradouro = $8,
+          numero = $9,
+          bairro = $10,
+          cidade = $11,
+          estado = $12,
+          cep = $13,
+          foto = COALESCE($14, foto),
+          email = $15,
+          ativo = $16,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $17
         `,
         [
           nome,
+          responsavel,
+          cpf,
+          rg,
           data_nascimento,
+          sexo,
+          telefone,
+          logradouro,
+          numero,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          foto,
+          email,
+          ativo,
           req.params.id
         ]
       );
 
-      res.json({
-        ok: true
-      });
+      await pool.query(
+        `
+        UPDATE usuarios
+        SET nome = $1, email = $2
+        WHERE aluno_id = $3
+        `,
+        [nome, email, req.params.id]
+      );
+
+      return res.json({ ok: true });
 
     } catch (err) {
-      res.status(500).json({
-        erro: err.message
-      });
+      console.error(err);
+      return res.status(500).json({ erro: err.message });
     }
   }
 );
@@ -178,6 +283,17 @@ router.delete(
   authorize("admin"),
   async (req, res) => {
     try {
+
+      // Exclui o usuário
+      await pool.query(
+        `
+        DELETE FROM usuarios
+        WHERE aluno_id = $1
+        `,
+        [req.params.id]
+      );
+
+      // Exclui o aluno
       await pool.query(
         `
         DELETE FROM alunos
