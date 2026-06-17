@@ -9,7 +9,7 @@ const authorize = require("../middleware/authorize");
 
 
 // ==========================
-// LISTAR PROFESSORES
+// LISTAR
 // ==========================
 router.get("/", auth, async (req, res) => {
   try {
@@ -19,7 +19,6 @@ router.get("/", auth, async (req, res) => {
       const result = await pool.query(
         "SELECT * FROM professores ORDER BY id DESC"
       );
-
       return res.json(result.rows);
     }
 
@@ -28,7 +27,6 @@ router.get("/", auth, async (req, res) => {
         "SELECT * FROM professores WHERE id = $1",
         [user.professor_id]
       );
-
       return res.json(result.rows);
     }
 
@@ -41,13 +39,18 @@ router.get("/", auth, async (req, res) => {
 
 
 // ==========================
-// CREATE PROFESSOR
+// CREATE
 // ==========================
 router.post("/", auth, authorize("admin"), async (req, res) => {
   try {
-    const { nome, disciplina, email, senha } = req.body;
+    const {
+      nome,
+      disciplina,
+      email,
+      telefone,
+      senha
+    } = req.body;
 
-    // email duplicado
     const existe = await pool.query(
       "SELECT id FROM usuarios WHERE email = $1",
       [email]
@@ -59,11 +62,11 @@ router.post("/", auth, authorize("admin"), async (req, res) => {
 
     const prof = await pool.query(
       `
-      INSERT INTO professores (nome, disciplina)
-      VALUES ($1,$2)
+      INSERT INTO professores (nome, disciplina, email, telefone)
+      VALUES ($1,$2,$3,$4)
       RETURNING id
       `,
-      [nome, disciplina]
+      [nome, disciplina, email, telefone]
     );
 
     const professor_id = prof.rows[0].id;
@@ -90,29 +93,38 @@ router.post("/", auth, authorize("admin"), async (req, res) => {
 
 
 // ==========================
-// UPDATE PROFESSOR
+// UPDATE
 // ==========================
 router.put("/:id", auth, authorize("admin"), async (req, res) => {
   try {
-    const { nome, disciplina } = req.body;
+    const {
+      nome,
+      disciplina,
+      email,
+      telefone
+    } = req.body;
 
     await pool.query(
       `
       UPDATE professores
       SET nome = $1,
-          disciplina = $2
-      WHERE id = $3
+          disciplina = $2,
+          email = $3,
+          telefone = $4,
+          updated_at = NOW()
+      WHERE id = $5
       `,
-      [nome, disciplina, req.params.id]
+      [nome, disciplina, email, telefone, req.params.id]
     );
 
     await pool.query(
       `
       UPDATE usuarios
-      SET nome = $1
-      WHERE professor_id = $2
+      SET nome = $1,
+          email = $2
+      WHERE professor_id = $3
       `,
-      [nome, req.params.id]
+      [nome, email, req.params.id]
     );
 
     return res.json({ ok: true });
@@ -124,7 +136,7 @@ router.put("/:id", auth, authorize("admin"), async (req, res) => {
 
 
 // ==========================
-// DELETE PROFESSOR
+// DELETE
 // ==========================
 router.delete("/:id", auth, authorize("admin"), async (req, res) => {
   try {

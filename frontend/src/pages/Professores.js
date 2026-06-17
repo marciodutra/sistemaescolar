@@ -10,6 +10,7 @@ function Professores() {
   const [nome, setNome] = useState("");
   const [disciplina, setDisciplina] = useState("");
   const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
 
   const [lista, setLista] = useState([]);
@@ -32,6 +33,7 @@ function Professores() {
     setNome("");
     setDisciplina("");
     setEmail("");
+    setTelefone("");
     setSenha("");
     setEditando(null);
   }
@@ -49,7 +51,9 @@ function Professores() {
       if (editando) {
         await api.put(`/professores/${editando.id}`, {
           nome,
-          disciplina
+          disciplina,
+          email,
+          telefone
         });
 
         toast.success("Professor atualizado!");
@@ -58,6 +62,7 @@ function Professores() {
           nome,
           disciplina,
           email,
+          telefone,
           senha
         });
 
@@ -76,6 +81,8 @@ function Professores() {
     setEditando(p);
     setNome(p.nome);
     setDisciplina(p.disciplina);
+    setEmail(p.email || "");
+    setTelefone(p.telefone || "");
   }
 
   async function excluir(id) {
@@ -98,13 +105,20 @@ function Professores() {
         <h2>{editando ? "Editar Professor" : "Novo Professor"}</h2>
 
         <input placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
+
         <input placeholder="Disciplina" value={disciplina} onChange={e => setDisciplina(e.target.value)} />
 
+        <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+
+        <input placeholder="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
+
         {!editando && (
-          <>
-            <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
-          </>
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={e => setSenha(e.target.value)}
+          />
         )}
 
         <button onClick={salvar}>
@@ -117,7 +131,7 @@ function Professores() {
 
         {lista.map(p => (
           <div key={p.id}>
-            <b>{p.nome}</b> - {p.disciplina}
+            <b>{p.nome}</b> - {p.disciplina} - {p.email}
 
             <button onClick={() => editar(p)}>Editar</button>
             <button onClick={() => excluir(p.id)}>Excluir</button>
