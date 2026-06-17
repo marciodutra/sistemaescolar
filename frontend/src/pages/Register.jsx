@@ -97,12 +97,15 @@ function Register() {
           onChange={(e) => setRg(e.target.value)}
         />
 
-        <input
+        <select
           className="form-control mb-3"
-          placeholder="Sexo"
           value={sexo}
           onChange={(e) => setSexo(e.target.value)}
-        />
+        >
+          <option value="">Selecione o sexo</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Feminino">Feminino</option>
+        </select>
 
         <input
           className="form-control mb-3"
@@ -139,9 +142,21 @@ function Register() {
           onChange={(e) => setFoto(e.target.files[0])}
         />
 
-        <button className="btn btn-success w-100" onClick={cadastrar}>
-          Cadastrar
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-secondary w-50"
+            onClick={() => navigate("/")}
+          >
+            Voltar
+          </button>
+
+          <button
+            className="btn btn-success w-50"
+            onClick={cadastrar}
+          >
+            Cadastrar
+          </button>
+        </div>
       </div>
     </Layout>
   );

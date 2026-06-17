@@ -265,7 +265,15 @@ export default function Alunos() {
             <input style={styles.input} placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
             <input style={styles.input} placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} />
             <input style={styles.input} placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
-            <input style={styles.input} placeholder="Sexo" value={sexo} onChange={e => setSexo(e.target.value)} />
+            <select
+              style={styles.input}
+              value={sexo}
+              onChange={e => setSexo(e.target.value)}
+            >
+              <option value="">Selecione o sexo</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+            </select>
             <input style={styles.input} placeholder="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
 
             <input style={styles.input} type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
