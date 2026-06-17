@@ -115,6 +115,32 @@ router.post(
 
       const foto = req.file ? req.file.path : null;
 
+      // Verifica CPF
+const cpfExiste = await pool.query(
+  "SELECT id FROM alunos WHERE cpf = $1",
+  [cpf]
+);
+
+if (cpfExiste.rows.length > 0) {
+  return res.status(400).json({
+    success: false,
+    erro: "Já existe um aluno cadastrado com este CPF."
+  });
+}
+
+// Verifica e-mail
+const emailExiste = await pool.query(
+  "SELECT id FROM usuarios WHERE email = $1",
+  [email]
+);
+
+if (emailExiste.rows.length > 0) {
+  return res.status(400).json({
+    success: false,
+    erro: "Este e-mail já está cadastrado."
+  });
+}
+
       // 1. cria aluno
       const alunoResult = await pool.query(
         `
