@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
@@ -11,7 +11,8 @@ export default function AlunoDetalhes() {
   const [aluno, setAluno] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  async function carregarAluno() {
+  // ✅ CORREÇÃO APENAS AQUI (sem mexer no layout)
+  const carregarAluno = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -31,11 +32,11 @@ export default function AlunoDetalhes() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, navigate]);
 
   useEffect(() => {
     carregarAluno();
-  }, [id]);
+  }, [carregarAluno]);
 
   async function excluirAluno() {
     if (!window.confirm("Tem certeza que deseja excluir este aluno?")) return;
