@@ -303,7 +303,11 @@ export default function Professores() {
               <div key={p.id} style={styles.item}>
                 <div style={{ display: "flex", alignItems: "center" }}>
                   {p.foto && (
-                    <img src={p.foto} style={styles.avatar} />
+                    <img
+                      src={p.foto}
+                      alt={p.nome}
+                      style={styles.avatar}
+                    />
                   )}
 
                   <div>
