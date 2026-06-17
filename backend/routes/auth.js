@@ -198,9 +198,31 @@ router.post(
 
     } catch (err) {
       console.error(err);
+
+      if (err.constraint === "alunos_cpf_unique") {
+        return res.status(400).json({
+          success: false,
+          erro: "Já existe um aluno cadastrado com este CPF."
+        });
+      }
+
+      if (err.constraint === "alunos_email_unique") {
+        return res.status(400).json({
+          success: false,
+          erro: "Já existe um aluno cadastrado com este e-mail."
+        });
+      }
+
+      if (err.constraint === "usuarios_email_key") {
+        return res.status(400).json({
+          success: false,
+          erro: "Este e-mail já possui um usuário cadastrado."
+        });
+      }
+
       return res.status(500).json({
         success: false,
-        erro: err.message
+        erro: "Erro ao cadastrar usuário."
       });
     }
   }
