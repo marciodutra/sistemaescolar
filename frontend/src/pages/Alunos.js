@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
@@ -7,336 +7,179 @@ import Layout from "../components/Layout";
 export default function Alunos() {
   const navigate = useNavigate();
 
-  const [nome, setNome] = useState("");
-  const [dataNascimento, setDataNascimento] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [foto, setFoto] = useState(null);
+  const [alunos, setAlunos] = useState([]);
+  const [busca, setBusca] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [responsavel, setResponsavel] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [rg, setRg] = useState("");
-  const [sexo, setSexo] = useState("");
-  const [telefone, setTelefone] = useState("");
-
-  const [logradouro, setLogradouro] = useState("");
-  const [numero, setNumero] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [estado, setEstado] = useState("");
-  const [cep, setCep] = useState("");
-
-  const [lista, setLista] = useState([]);
-  const [alunoEmEdicao, setAlunoEmEdicao] = useState(null);
-  const [fotoAtual, setFotoAtual] = useState(null);
-
-  function formatarData(dataISO) {
-    if (!dataISO) return "";
-    return new Date(dataISO).toLocaleDateString("pt-BR");
-  }
-
-  async function carregar() {
+  // 🔥 Carregar alunos
+  async function carregarAlunos() {
     try {
-      const response = await api.get("/alunos");
-      setLista(response.data);
+      setLoading(true);
+      const res = await api.get("/alunos");
+      setAlunos(res.data);
     } catch (err) {
-      console.log("Erro ao carregar alunos:", err);
+      console.log(err);
+      toast.error("Erro ao carregar alunos");
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    carregar();
+    carregarAlunos();
   }, []);
 
-  function limparFormulario() {
-    setNome("");
-    setDataNascimento("");
-    setEmail("");
-    setSenha("");
-    setFoto(null);
-    setResponsavel("");
-    setCpf("");
-    setRg("");
-    setSexo("");
-    setTelefone("");
-    setLogradouro("");
-    setNumero("");
-    setBairro("");
-    setCidade("");
-    setEstado("");
-    setCep("");
-    setAlunoEmEdicao(null);
+  // 🔎 filtro de busca
+  const alunosFiltrados = alunos.filter((a) =>
+    a.nome?.toLowerCase().includes(busca.toLowerCase())
+  );
+
+  function abrirAluno(id) {
+    navigate(`/alunos/${id}`);
   }
 
-  function editar(aluno) {
-    setAlunoEmEdicao(aluno);
-
-    setNome(aluno.nome || "");
-    setDataNascimento(aluno.data_nascimento || "");
-    setResponsavel(aluno.responsavel || "");
-    setCpf(aluno.cpf || "");
-    setRg(aluno.rg || "");
-    setSexo(aluno.sexo || "");
-    setTelefone(aluno.telefone || "");
-    setLogradouro(aluno.logradouro || "");
-    setNumero(aluno.numero || "");
-    setBairro(aluno.bairro || "");
-    setCidade(aluno.cidade || "");
-    setEstado(aluno.estado || "");
-    setCep(aluno.cep || "");
-
-    setFotoAtual(aluno.foto || null);
+  function novoAluno() {
+    navigate("/alunos/novo");
   }
 
-  function cancelarEdicao() {
-    limparFormulario();
-  }
+  function getFoto(foto) {
+    if (!foto) return "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
 
-  async function excluir(id) {
-    try {
-      await api.delete(`/alunos/${id}`);
-      toast.success("Aluno excluído!");
-      carregar();
-    } catch (err) {
-      toast.error("Erro ao excluir aluno");
-    }
-  }
+    if (foto.startsWith("http")) return foto;
 
-  async function salvar() {
-    try {
-      if (!nome || !dataNascimento) {
-        toast.warning("Preencha todos os campos obrigatórios!");
-        return;
-      }
-
-      const formData = new FormData();
-
-      formData.append("nome", nome);
-      formData.append("responsavel", responsavel);
-      formData.append("cpf", cpf);
-      formData.append("rg", rg);
-      formData.append("data_nascimento", dataNascimento);
-      formData.append("sexo", sexo);
-      formData.append("telefone", telefone);
-      formData.append("logradouro", logradouro);
-      formData.append("numero", numero);
-      formData.append("bairro", bairro);
-      formData.append("cidade", cidade);
-      formData.append("estado", estado);
-      formData.append("cep", cep);
-
-      if (foto) formData.append("foto", foto);
-
-      if (alunoEmEdicao) {
-        await api.put(`/alunos/${alunoEmEdicao.id}`, formData);
-        toast.success("Aluno atualizado com sucesso!");
-      } else {
-        if (!email || !senha) {
-          toast.warning("Email e senha são obrigatórios!");
-          return;
-        }
-
-        formData.append("email", email);
-        formData.append("senha", senha);
-
-        await api.post("/alunos", formData);
-        toast.success("Aluno cadastrado com sucesso!");
-      }
-
-      limparFormulario();
-      carregar();
-    } catch (err) {
-      console.log(err);
-      toast.error("Erro ao salvar aluno");
-    }
+    // ⚠️ ajuste aqui depois com sua URL do Render
+    return `${import.meta.env.VITE_API_URL}/${foto}`;
   }
 
   const styles = {
-    container: { display: "flex", justifyContent: "center", padding: 20 },
-
-    card: {
-      width: "100%",
-      maxWidth: 700,
-      background: "#fff",
-      borderRadius: 20,
-      padding: 25,
-      boxShadow: "0 20px 50px rgba(0,0,0,.15)"
-    },
+    container: { padding: 20 },
 
     header: {
       display: "flex",
       justifyContent: "space-between",
-      marginBottom: 20
+      alignItems: "center",
+      marginBottom: 20,
     },
 
-    backButton: {
-      background: "#e2e8f0",
-      border: "none",
-      padding: 10,
-      borderRadius: 8,
-      cursor: "pointer"
+    title: {
+      fontSize: 22,
+      fontWeight: "bold",
     },
 
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 10
-    },
-
-    input: {
-      padding: 12,
-      border: "1px solid #ccc",
-      borderRadius: 8
-    },
-
-    buttonGroup: {
-      display: "flex",
-      gap: 10
-    },
-
-    saveButton: {
-      flex: 1,
+    button: {
       background: "#2563eb",
       color: "#fff",
       border: "none",
-      padding: 12,
-      borderRadius: 8
+      padding: "10px 15px",
+      borderRadius: 8,
+      cursor: "pointer",
     },
 
-    cancelButton: {
-      flex: 1,
-      background: "#cbd5e1",
-      border: "none",
+    search: {
+      width: "100%",
       padding: 12,
-      borderRadius: 8
+      borderRadius: 10,
+      border: "1px solid #ddd",
+      marginBottom: 20,
     },
 
     list: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 10
+      display: "grid",
+      gap: 10,
     },
 
-    item: {
+    card: {
       display: "flex",
+      alignItems: "center",
       justifyContent: "space-between",
-      padding: 12,
-      background: "#f8fafc",
-      borderRadius: 10
+      padding: 15,
+      borderRadius: 12,
+      background: "#fff",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+      cursor: "pointer",
     },
 
-    editButton: {
-      background: "green",
-      color: "#fff",
-      border: "none",
-      padding: "6px 10px",
-      borderRadius: 6,
-      marginRight: 5
+    left: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
     },
 
-    deleteButton: {
-      background: "red",
-      color: "#fff",
-      border: "none",
-      padding: "6px 10px",
-      borderRadius: 6
-    }
+    foto: {
+      width: 45,
+      height: 45,
+      borderRadius: "50%",
+      objectFit: "cover",
+      background: "#eee",
+    },
+
+    nome: {
+      fontWeight: "bold",
+    },
+
+    sub: {
+      fontSize: 12,
+      color: "#666",
+    },
+
+    arrow: {
+      fontSize: 18,
+      color: "#999",
+    },
   };
 
   return (
-    <Layout titulo="Cadastro de Alunos">
+    <Layout titulo="Alunos">
       <div style={styles.container}>
-        <div style={styles.card}>
 
-          <div style={styles.header}>
-            <h1>{alunoEmEdicao ? "Editar Aluno" : "Cadastro de Alunos"}</h1>
+        {/* HEADER */}
+        <div style={styles.header}>
+          <div style={styles.title}>👨‍🎓 Alunos</div>
 
-            <button
-              style={styles.backButton}
-              onClick={() => navigate("/dashboard")}
-            >
-              ← Voltar
-            </button>
-          </div>
+          <button style={styles.button} onClick={novoAluno}>
+            + Novo aluno
+          </button>
+        </div>
 
-          <div style={styles.form}>
+        {/* BUSCA */}
+        <input
+          style={styles.search}
+          placeholder="Pesquisar aluno..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
 
-            <input style={styles.input} placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
-            <input style={styles.input} placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
-            <input style={styles.input} placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} />
-            <input style={styles.input} placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
-            <select
-              style={styles.input}
-              value={sexo}
-              onChange={e => setSexo(e.target.value)}
-            >
-              <option value="">Selecione o sexo</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-            </select>
-            <input style={styles.input} placeholder="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
-
-            <input style={styles.input} type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
-
-            <input style={styles.input} type="file" onChange={e => setFoto(e.target.files[0])} />
-
-            {fotoAtual && (
-              <div style={{ marginTop: 10 }}>
-                <img
-                  src={fotoAtual}
-                  alt="Foto do aluno"
-                  style={{ width: 100, height: 100, borderRadius: 10 }}
-                />
-              </div>
-            )}
-
-            {!alunoEmEdicao && (
-              <>
-                <input style={styles.input} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-                <input style={styles.input} type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
-              </>
-            )}
-
-            <div style={styles.buttonGroup}>
-              <button style={styles.saveButton} onClick={salvar}>
-                {alunoEmEdicao ? "Atualizar" : "Salvar"}
-              </button>
-
-              {alunoEmEdicao && (
-                <button style={styles.cancelButton} onClick={cancelarEdicao}>
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-
-          <hr />
-
-          <h2>Alunos cadastrados</h2>
-
+        {/* LISTA */}
+        {loading ? (
+          <p>Carregando...</p>
+        ) : (
           <div style={styles.list}>
-            {lista.map(aluno => (
-              <div key={aluno.id} style={styles.item}>
-                <div>
-                  <strong>{aluno.nome}</strong>
-                  <br />
-                  <span>{formatarData(aluno.data_nascimento)}</span>
+            {alunosFiltrados.map((aluno) => (
+              <div
+                key={aluno.id}
+                style={styles.card}
+                onClick={() => abrirAluno(aluno.id)}
+              >
+                <div style={styles.left}>
+                  <img
+                    src={getFoto(aluno.foto)}
+                    style={styles.foto}
+                    alt="foto"
+                  />
+
+                  <div>
+                    <div style={styles.nome}>{aluno.nome}</div>
+                    <div style={styles.sub}>
+                      {aluno.responsavel || "Sem responsável"}
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <button style={styles.editButton} onClick={() => editar(aluno)}>
-                    Editar
-                  </button>
-
-                  <button style={styles.deleteButton} onClick={() => excluir(aluno.id)}>
-                    Excluir
-                  </button>
-                </div>
+                <div style={styles.arrow}>›</div>
               </div>
             ))}
           </div>
-
-        </div>
+        )}
       </div>
     </Layout>
   );

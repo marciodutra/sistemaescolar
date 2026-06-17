@@ -7,32 +7,26 @@ const upload = require("../middleware/upload");
 const auth = require("../middleware/auth");
 const authorize = require("../middleware/authorize");
 
+/* =========================================
+   GET TODOS / POR PERFIL
+========================================= */
 router.get("/", auth, async (req, res) => {
   try {
     const user = req.user;
 
-    // 👑 ADMIN / SECRETARIA
-    if (
-      user.perfil === "admin" ||
-      user.perfil === "secretaria"
-    ) {
+    if (user.perfil === "admin" || user.perfil === "secretaria") {
       const result = await pool.query(
         "SELECT * FROM alunos ORDER BY id DESC"
       );
-
       return res.json(result.rows);
     }
 
-    // 👩‍🏫 PROFESSOR
     if (user.perfil === "professor") {
       const result = await pool.query(`
-        SELECT DISTINCT
-          a.*
+        SELECT DISTINCT a.*
         FROM alunos a
-        INNER JOIN matriculas m
-          ON m.aluno_id = a.id
-        INNER JOIN turmas t
-          ON t.id = m.turma_id
+        INNER JOIN matriculas m ON m.aluno_id = a.id
+        INNER JOIN turmas t ON t.id = m.turma_id
         WHERE t.professor_id = $1
         ORDER BY a.nome
       `, [user.professor_id]);
@@ -40,33 +34,25 @@ router.get("/", auth, async (req, res) => {
       return res.json(result.rows);
     }
 
-    // 🧑 ALUNO
     if (user.perfil === "aluno") {
       const result = await pool.query(
-        `
-        SELECT *
-        FROM alunos
-        WHERE id = $1
-        `,
+        `SELECT * FROM alunos WHERE id = $1`,
         [user.aluno_id]
       );
 
       return res.json(result.rows);
     }
 
-    return res.status(403).json({
-      erro: "Acesso negado"
-    });
+    return res.status(403).json({ erro: "Acesso negado" });
 
   } catch (err) {
-    res.status(500).json({
-      erro: err.message
-    });
+    return res.status(500).json({ erro: err.message });
   }
 });
 
-
-// CREATE
+/* =========================================
+   CREATE (CORRIGIDO + BLINDADO)
+========================================= */
 router.post(
   "/",
   auth,
@@ -74,29 +60,29 @@ router.post(
   upload.single("foto"),
   async (req, res) => {
     try {
+      console.log("BODY RECEBIDO:", req.body);
 
-      const foto = req.file ? req.file.path : undefined;
+      const foto = req.file ? req.file.path : null;
 
       const {
-  nome,
-  responsavel,
-  cpf,
-  rg,
-  data_nascimento,
-  sexo,
-  telefone,
-  logradouro,
-  numero,
-  bairro,
-  cidade,
-  estado,
-  cep,
-  email,
-  senha
-} = req.body;
+        nome,
+        responsavel,
+        cpf,
+        rg,
+        data_nascimento,
+        sexo,
+        telefone,
+        logradouro,
+        numero,
+        bairro,
+        cidade,
+        estado,
+        cep,
+        email,
+        senha
+      } = req.body;
 
-      // Cadastra o aluno
-      const alunoResult = await pool.query(
+      const result = await pool.query(
         `
         INSERT INTO alunos (
           nome,
@@ -123,25 +109,25 @@ router.post(
         RETURNING id
         `,
         [
-          nome,
-          responsavel,
-          cpf,
-          rg,
-          data_nascimento,
-          sexo,
-          telefone,
-          logradouro,
-          numero,
-          bairro,
-          cidade,
-          estado,
-          cep,
+          nome || "",
+          responsavel || "",
+          cpf || "",
+          rg || "",
+          data_nascimento || null,
+          sexo || "",
+          telefone || "",
+          logradouro || "",
+          numero || "",
+          bairro || "",
+          cidade || "",
+          estado || "",
+          cep || "",
           foto,
-          email
+          email || ""
         ]
       );
 
-      const aluno_id = alunoResult.rows[0].id;
+      const aluno_id = result.rows[0].id;
 
       const senhaHash = await bcrypt.hash(senha, 10);
 
@@ -165,25 +151,18 @@ router.post(
         ]
       );
 
-      res.json({
-        ok: true,
-        aluno_id
-      });
+      return res.json({ ok: true, aluno_id });
 
     } catch (err) {
-
       console.error(err);
-
-      res.status(500).json({
-        erro: err.message
-      });
-
+      return res.status(500).json({ erro: err.message });
     }
   }
 );
 
-
-// UPDATE
+/* =========================================
+   UPDATE (SEGURADO)
+========================================= */
 router.put(
   "/:id",
   auth,
@@ -191,8 +170,6 @@ router.put(
   upload.single("foto"),
   async (req, res) => {
     try {
-
-      // 🔥 GARANTE QUE NÃO QUEBRA SE VIER VAZIO
       const {
         nome = "",
         responsavel = "",
@@ -275,41 +252,29 @@ router.put(
   }
 );
 
-
-// DELETE
+/* =========================================
+   DELETE
+========================================= */
 router.delete(
   "/:id",
   auth,
   authorize("admin"),
   async (req, res) => {
     try {
-
-      // Exclui o usuário
       await pool.query(
-        `
-        DELETE FROM usuarios
-        WHERE aluno_id = $1
-        `,
+        `DELETE FROM usuarios WHERE aluno_id = $1`,
         [req.params.id]
       );
 
-      // Exclui o aluno
       await pool.query(
-        `
-        DELETE FROM alunos
-        WHERE id = $1
-        `,
+        `DELETE FROM alunos WHERE id = $1`,
         [req.params.id]
       );
 
-      res.json({
-        ok: true
-      });
+      return res.json({ ok: true });
 
     } catch (err) {
-      res.status(500).json({
-        erro: err.message
-      });
+      return res.status(500).json({ erro: err.message });
     }
   }
 );

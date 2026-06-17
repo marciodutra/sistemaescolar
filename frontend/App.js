@@ -3,20 +3,21 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
+import Alunos from "./pages/alunos/Alunos";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route
-          path="/"
-          element={<Login />}
-        />
+        {/* LOGIN */}
+        <Route path="/" element={<Login />} />
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+        {/* DASHBOARD */}
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* ALUNOS (TUDO EM UMA SÓ TELA) */}
+        <Route path="/alunos" element={<Alunos />} />
 
       </Routes>
     </BrowserRouter>

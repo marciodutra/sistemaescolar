@@ -20,6 +20,8 @@ import TicketDetalhe from "./pages/TicketDetalhe";
 import SuporteAluno from "./pages/SuporteAluno";
 import SuporteProfessor from "./pages/SuporteProfessor";
 import SuporteAdmin from "./pages/SuporteAdmin";
+import AlunoDetalhes from "./pages/alunos/AlunoDetalhes";
+import AlunoForm from "./pages/alunos/AlunoForm";
 
 function App() {
   return (
@@ -153,6 +155,24 @@ function App() {
           element={
             <PrivateRoute>
               <SuporteAdmin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/alunos/:id"
+          element={
+            <PrivateRoute>
+              <AlunoDetalhes />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/alunos/novo"
+          element={
+            <PrivateRoute>
+              <AlunoForm />
             </PrivateRoute>
           }
         />
