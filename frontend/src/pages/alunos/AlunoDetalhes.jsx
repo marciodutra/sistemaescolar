@@ -51,8 +51,8 @@ export default function AlunoDetalhes() {
   }
 
   function editarAluno() {
-    navigate(`/alunos/${id}/editar`);
-  }
+  navigate(`/alunos/${id}/editar`);
+}
 
   function getFoto(foto) {
     if (!foto) return "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";

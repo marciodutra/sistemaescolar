@@ -37,6 +37,7 @@ export default function Alunos() {
   function abrirAluno(id) {
     navigate(`/alunos/${id}`);
   }
+  
 
   function novoAluno() {
     navigate("/alunos/novo");
@@ -46,8 +47,7 @@ export default function Alunos() {
     if (!foto) return "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
 
     if (foto.startsWith("http")) return foto;
-
-    // ⚠️ ajuste aqui depois com sua URL do Render
+   
     return `${import.meta.env.VITE_API_URL}/${foto}`;
   }
 

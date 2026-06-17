@@ -176,6 +176,23 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/alunos/:id"
+          element={
+            <PrivateRoute>
+              <AlunoForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+  path="/alunos/:id/editar"
+  element={
+    <PrivateRoute>
+      <AlunoForm />
+    </PrivateRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
