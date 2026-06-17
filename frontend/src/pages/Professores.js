@@ -13,6 +13,9 @@ export default function Professores() {
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
 
+  const [foto, setFoto] = useState(null);
+  const [fotoAtual, setFotoAtual] = useState(null);
+
   const [lista, setLista] = useState([]);
   const [editando, setEditando] = useState(null);
 
@@ -35,6 +38,8 @@ export default function Professores() {
     setEmail("");
     setTelefone("");
     setSenha("");
+    setFoto(null);
+    setFotoAtual(null);
     setEditando(null);
   }
 
@@ -45,6 +50,9 @@ export default function Professores() {
     setDisciplina(p.disciplina || "");
     setEmail(p.email || "");
     setTelefone(p.telefone || "");
+
+    setFotoAtual(p.foto || null);
+    setFoto(null);
   }
 
   async function excluir(id) {
@@ -64,27 +72,33 @@ export default function Professores() {
         return;
       }
 
-      if (!editando && (!email || !senha)) {
-        toast.warning("Email e senha são obrigatórios!");
-        return;
+      const formData = new FormData();
+
+      formData.append("nome", nome);
+      formData.append("disciplina", disciplina);
+      formData.append("email", email);
+      formData.append("telefone", telefone);
+
+      if (foto) {
+        formData.append("foto", foto);
       }
 
       if (editando) {
-        await api.put(`/professores/${editando.id}`, {
-          nome,
-          disciplina,
-          email,
-          telefone,
+        await api.put(`/professores/${editando.id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
         toast.success("Professor atualizado!");
       } else {
-        await api.post("/professores", {
-          nome,
-          disciplina,
-          email,
-          telefone,
-          senha,
+        if (!email || !senha) {
+          toast.warning("Email e senha são obrigatórios!");
+          return;
+        }
+
+        formData.append("senha", senha);
+
+        await api.post("/professores", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
         toast.success("Professor cadastrado!");
@@ -95,10 +109,6 @@ export default function Professores() {
     } catch (err) {
       toast.error(err.response?.data?.erro || "Erro ao salvar professor");
     }
-  }
-
-  function cancelarEdicao() {
-    limparFormulario();
   }
 
   const styles = {
@@ -173,6 +183,7 @@ export default function Professores() {
       padding: 12,
       background: "#f8fafc",
       borderRadius: 10,
+      alignItems: "center",
     },
 
     editButton: {
@@ -190,6 +201,14 @@ export default function Professores() {
       border: "none",
       padding: "6px 10px",
       borderRadius: 6,
+    },
+
+    avatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 10,
+      objectFit: "cover",
+      marginRight: 10,
     },
   };
 
@@ -239,6 +258,16 @@ export default function Professores() {
               onChange={(e) => setTelefone(e.target.value)}
             />
 
+            <input
+              style={styles.input}
+              type="file"
+              onChange={(e) => setFoto(e.target.files[0])}
+            />
+
+            {fotoAtual && (
+              <img src={fotoAtual} alt="foto" style={{ width: 80, borderRadius: 10 }} />
+            )}
+
             {!editando && (
               <input
                 style={styles.input}
@@ -257,7 +286,7 @@ export default function Professores() {
               {editando && (
                 <button
                   style={styles.cancelButton}
-                  onClick={cancelarEdicao}
+                  onClick={limparFormulario}
                 >
                   Cancelar
                 </button>
@@ -272,10 +301,16 @@ export default function Professores() {
           <div style={styles.list}>
             {lista.map((p) => (
               <div key={p.id} style={styles.item}>
-                <div>
-                  <strong>{p.nome}</strong>
-                  <br />
-                  <span>{p.disciplina}</span>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {p.foto && (
+                    <img src={p.foto} style={styles.avatar} />
+                  )}
+
+                  <div>
+                    <strong>{p.nome}</strong>
+                    <br />
+                    <span>{p.disciplina}</span>
+                  </div>
                 </div>
 
                 <div>
