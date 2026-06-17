@@ -75,7 +75,7 @@ router.post(
   async (req, res) => {
     try {
 
-      const foto = req.file ? req.file.path : null;
+      const foto = req.file ? req.file.path : undefined;
 
       const {
   nome,

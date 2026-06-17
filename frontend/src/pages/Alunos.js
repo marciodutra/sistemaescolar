@@ -28,6 +28,7 @@ export default function Alunos() {
 
   const [lista, setLista] = useState([]);
   const [alunoEmEdicao, setAlunoEmEdicao] = useState(null);
+  const [fotoAtual, setFotoAtual] = useState(null);
 
   function formatarData(dataISO) {
     if (!dataISO) return "";
@@ -83,6 +84,8 @@ export default function Alunos() {
     setCidade(aluno.cidade || "");
     setEstado(aluno.estado || "");
     setCep(aluno.cep || "");
+
+    setFotoAtual(aluno.foto || null);
   }
 
   function cancelarEdicao() {
@@ -268,6 +271,16 @@ export default function Alunos() {
             <input style={styles.input} type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
 
             <input style={styles.input} type="file" onChange={e => setFoto(e.target.files[0])} />
+
+            {fotoAtual && (
+              <div style={{ marginTop: 10 }}>
+                <img
+                  src={fotoAtual}
+                  alt="Foto do aluno"
+                  style={{ width: 100, height: 100, borderRadius: 10 }}
+                />
+              </div>
+            )}
 
             {!alunoEmEdicao && (
               <>
