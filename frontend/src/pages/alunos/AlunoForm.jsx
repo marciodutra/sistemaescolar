@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
@@ -31,16 +31,14 @@ export default function AlunoForm() {
   const [foto, setFoto] = useState(null);
   const [fotoAtual, setFotoAtual] = useState(null);
 
-  // 🔥 CARREGAR ALUNO (CORRIGIDO)
-  async function carregarAluno() {
+  // ✅ FUNÇÃO CORRETA (useCallback)
+  const carregarAluno = useCallback(async () => {
     if (!id) return;
 
     try {
       setLoading(true);
 
-      // 🔥 usa endpoint correto existente no seu backend
       const res = await api.get("/alunos");
-
       const lista = Array.isArray(res.data) ? res.data : [];
 
       const aluno = lista.find((a) => a.id === Number(id));
@@ -75,11 +73,12 @@ export default function AlunoForm() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, navigate]);
 
+  // ✅ useEffect correto
   useEffect(() => {
     carregarAluno();
-  }, [id]);
+  }, [carregarAluno]);
 
   function getFoto(foto) {
     if (!foto) return null;
@@ -147,7 +146,6 @@ export default function AlunoForm() {
 
   const styles = {
     container: { display: "flex", justifyContent: "center", padding: 20 },
-
     card: {
       width: "100%",
       maxWidth: 800,
@@ -156,39 +154,29 @@ export default function AlunoForm() {
       padding: 25,
       boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
     },
-
-    title: {
-      fontSize: 22,
-      fontWeight: "bold",
-      marginBottom: 20,
-    },
-
+    title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
     grid: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 10,
     },
-
     input: {
       padding: 12,
       borderRadius: 8,
       border: "1px solid #ddd",
     },
-
     fotoBox: {
       display: "flex",
       alignItems: "center",
       gap: 15,
       marginBottom: 15,
     },
-
     foto: {
       width: 80,
       height: 80,
       borderRadius: "50%",
       objectFit: "cover",
     },
-
     button: {
       marginTop: 20,
       width: "100%",
@@ -205,7 +193,6 @@ export default function AlunoForm() {
     <Layout titulo={id ? "Editar Aluno" : "Novo Aluno"}>
       <div style={styles.container}>
         <div style={styles.card}>
-
           <div style={styles.title}>
             {id ? "Editar Aluno" : "Cadastro de Aluno"}
           </div>
@@ -213,24 +200,16 @@ export default function AlunoForm() {
           {/* FOTO */}
           <div style={styles.fotoBox}>
             <img
-              src={
-                foto
-                  ? URL.createObjectURL(foto)
-                  : getFoto(fotoAtual)
-              }
+              src={foto ? URL.createObjectURL(foto) : getFoto(fotoAtual)}
               style={styles.foto}
               alt="foto"
             />
 
-            <input
-              type="file"
-              onChange={(e) => setFoto(e.target.files[0])}
-            />
+            <input type="file" onChange={(e) => setFoto(e.target.files[0])} />
           </div>
 
           {/* FORM */}
           <div style={styles.grid}>
-
             <input style={styles.input} placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
             <input style={styles.input} placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
 
@@ -261,13 +240,11 @@ export default function AlunoForm() {
 
             <input style={styles.input} placeholder="Estado" value={estado} onChange={e => setEstado(e.target.value)} />
             <input style={styles.input} placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} />
-
           </div>
 
           <button style={styles.button} onClick={salvar} disabled={loading}>
             {loading ? "Salvando..." : "Salvar aluno"}
           </button>
-
         </div>
       </div>
     </Layout>
