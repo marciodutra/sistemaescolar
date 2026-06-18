@@ -37,6 +37,8 @@ import TicketDetalhe from "./pages/TicketDetalhe";
 import SuporteAluno from "./pages/SuporteAluno";
 import SuporteProfessor from "./pages/SuporteProfessor";
 import SuporteAdmin from "./pages/SuporteAdmin";
+import MatriculaForm from "./pages/matriculas/MatriculaForm";
+import MatriculaDetalhes from "./pages/matriculas/MatriculaDetalhes";
 
 function App() {
   return (
@@ -272,6 +274,42 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+  path="/matriculas"
+  element={
+    <PrivateRoute>
+      <Matriculas />
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/matriculas/nova"
+  element={
+    <PrivateRoute>
+      <MatriculaForm />
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/matriculas/:id"
+  element={
+    <PrivateRoute>
+      <MatriculaDetalhes />
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/matriculas/:id/editar"
+  element={
+    <PrivateRoute>
+      <MatriculaForm />
+    </PrivateRoute>
+  }
+/>
 
       </Routes>
     </BrowserRouter>

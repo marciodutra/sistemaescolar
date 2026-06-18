@@ -7,198 +7,154 @@ import Layout from "../components/Layout";
 export default function Matriculas() {
   const navigate = useNavigate();
 
-  const [alunos, setAlunos] = useState([]);
-  const [turmas, setTurmas] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
+  const [busca, setBusca] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [alunoId, setAlunoId] = useState("");
-  const [turmaId, setTurmaId] = useState("");
-
-  async function carregarDados() {
+  async function carregarMatriculas() {
     try {
-      const alunosRes = await api.get("/alunos");
-      const turmasRes = await api.get("/turmas");
-      const matriculasRes = await api.get("/matriculas");
-
-      setAlunos(alunosRes.data);
-      setTurmas(turmasRes.data);
-      setMatriculas(matriculasRes.data);
+      setLoading(true);
+      const res = await api.get("/matriculas");
+      setMatriculas(res.data);
     } catch (err) {
-      console.log("Erro ao carregar dados:", err);
+      console.log(err);
+      toast.error("Erro ao carregar matrículas");
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    carregarDados();
+    carregarMatriculas();
   }, []);
 
-  async function salvar(e) {
-    e.preventDefault();
+  const filtradas = matriculas.filter((m) =>
+    m.aluno?.toLowerCase().includes(busca.toLowerCase()) ||
+    m.turma?.toLowerCase().includes(busca.toLowerCase())
+  );
 
-    try {
-      if (!alunoId || !turmaId) {
-        toast.warning("Selecione aluno e turma!");
-        return;
-      }
-
-      await api.post("/matriculas", {
-        aluno_id: alunoId,
-        turma_id: turmaId,
-      });
-
-      toast.success("✅ Matrícula realizada com sucesso!");
-      setAlunoId("");
-      setTurmaId("");
-      carregarDados();
-    } catch (err) {
-      toast.error("❌ Erro ao matricular: " + err.message);
-      console.log("Erro ao matricular:", err);
-    }
+  function abrirMatricula(id) {
+    navigate(`/matriculas/${id}`);
   }
 
-  async function excluir(id) {
-    if (!window.confirm("Tem certeza que deseja excluir esta matrícula?")) {
-      return;
-    }
-
-    try {
-      await api.delete(`/matriculas/${id}`);
-      toast.success("✅ Matrícula excluída com sucesso!");
-      carregarDados();
-    } catch (err) {
-      toast.error("❌ Erro ao excluir matrícula: " + err.message);
-      console.log("Erro ao excluir matrícula:", err);
-    }
+  function novaMatricula() {
+    navigate("/matriculas/nova");
   }
+
+  const styles = {
+    container: { padding: 20 },
+
+    header: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+
+    title: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: "#fff",
+    },
+
+    button: {
+      background: "#2563eb",
+      color: "#fff",
+      border: "none",
+      padding: "10px 15px",
+      borderRadius: 8,
+      cursor: "pointer",
+    },
+
+    search: {
+      width: "100%",
+      padding: 12,
+      borderRadius: 10,
+      border: "1px solid #ddd",
+      marginBottom: 20,
+    },
+
+    list: {
+      display: "grid",
+      gap: 10,
+    },
+
+    card: {
+      display: "flex",
+      justifyContent: "space-between",
+      padding: 15,
+      borderRadius: 12,
+      background: "#fff",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+      cursor: "pointer",
+    },
+
+    left: {
+      display: "flex",
+      flexDirection: "column",
+    },
+
+    nome: {
+      fontWeight: "bold",
+    },
+
+    sub: {
+      fontSize: 12,
+      color: "#666",
+    },
+
+    arrow: {
+      fontSize: 18,
+      color: "#999",
+    },
+  };
 
   return (
     <Layout titulo="Matrículas">
       <div style={styles.container}>
-        <div style={styles.card}>
-          
-          <div style={styles.header}>
-            <h1 style={{ margin: 0 }}>Matrículas</h1>
 
-            <button
-              style={styles.backButton}
-              onClick={() => navigate("/dashboard")}
-            >
-              ← Voltar
-            </button>
-          </div>
+        {/* HEADER */}
+        <div style={styles.header}>
+          <div style={styles.title}>🎓 Matrículas</div>
 
-          <form onSubmit={salvar}>
-            <select
-              className="form-control mb-3"
-              value={alunoId}
-              onChange={(e) => setAlunoId(e.target.value)}
-              required
-            >
-              <option value="">
-                Selecione o aluno
-              </option>
-
-              {alunos.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nome}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="form-control mb-3"
-              value={turmaId}
-              onChange={(e) => setTurmaId(e.target.value)}
-              required
-            >
-              <option value="">
-                Selecione a turma
-              </option>
-
-              {turmas.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nome} - {t.ano}
-                </option>
-              ))}
-            </select>
-
-            <button
-              className="btn btn-primary"
-              type="submit"
-            >
-              Matricular
-            </button>
-          </form>
-
-          <hr style={{ margin: "20px 0" }} />
-
-          <h2>Matrículas realizadas</h2>
-
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Aluno</th>
-                <th>Turma</th>
-                <th>Ano</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {matriculas.map((m) => (
-                <tr key={m.id}>
-                  <td>{m.aluno}</td>
-                  <td>{m.turma}</td>
-                  <td>{m.ano}</td>
-
-                  <td>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => excluir(m.id)}
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
+          <button style={styles.button} onClick={novaMatricula}>
+            + Nova matrícula
+          </button>
         </div>
+
+        {/* BUSCA */}
+        <input
+          style={styles.search}
+          placeholder="Pesquisar aluno ou turma..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+
+        {/* LISTA */}
+        {loading ? (
+          <p>Carregando...</p>
+        ) : (
+          <div style={styles.list}>
+            {filtradas.map((m) => (
+              <div
+                key={m.id}
+                style={styles.card}
+                onClick={() => abrirMatricula(m.id)}
+              >
+                <div style={styles.left}>
+                  <div style={styles.nome}>{m.aluno}</div>
+                  <div style={styles.sub}>
+                    {m.turma} • Ano {m.ano}
+                  </div>
+                </div>
+
+                <div style={styles.arrow}>›</div>
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
     </Layout>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    padding: 20,
-  },
-
-  card: {
-    width: "100%",
-    maxWidth: 900,
-    background: "rgba(255,255,255,0.98)",
-    borderRadius: 20,
-    padding: 25,
-    boxShadow: "0 20px 50px rgba(0,0,0,.25)",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  backButton: {
-    background: "#e2e8f0",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: 10,
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-};

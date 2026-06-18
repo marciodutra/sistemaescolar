@@ -5,12 +5,12 @@ const pool = require("../config/db");
 const auth = require("../middleware/auth");
 const authorize = require("../middleware/authorize");
 
+
 // 🔥 LISTAR MATRÍCULAS (CONTROLADO)
 router.get("/", auth, async (req, res) => {
   try {
     const user = req.user;
 
-    // 👑 ADMIN / SECRETARIA
     if (user.perfil === "admin" || user.perfil === "secretaria") {
       const result = await pool.query(`
         SELECT
@@ -28,7 +28,6 @@ router.get("/", auth, async (req, res) => {
       return res.json(result.rows);
     }
 
-    // 👩‍🏫 PROFESSOR - apenas turmas dele
     if (user.perfil === "professor") {
       const result = await pool.query(`
         SELECT
@@ -47,7 +46,6 @@ router.get("/", auth, async (req, res) => {
       return res.json(result.rows);
     }
 
-    // 🧑 ALUNO - apenas ele mesmo
     if (user.perfil === "aluno") {
       const result = await pool.query(`
         SELECT
@@ -66,19 +64,45 @@ router.get("/", auth, async (req, res) => {
       return res.json(result.rows);
     }
 
-    return res.status(403).json({
-      erro: "Acesso negado"
-    });
+    return res.status(403).json({ erro: "Acesso negado" });
 
   } catch (err) {
-    res.status(500).json({
-      erro: err.message
-    });
+    return res.status(500).json({ erro: err.message });
   }
 });
 
 
-// CREATE (admin + secretaria)
+// 🔥 BUSCAR MATRÍCULA POR ID (CORREÇÃO DO ERRO 404)
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(`
+      SELECT
+        m.id,
+        a.nome AS aluno,
+        t.nome AS turma,
+        t.ano,
+        m.data_matricula
+      FROM matriculas m
+      INNER JOIN alunos a ON a.id = m.aluno_id
+      INNER JOIN turmas t ON t.id = m.turma_id
+      WHERE m.id = $1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erro: "Matrícula não encontrada" });
+    }
+
+    return res.json(result.rows[0]);
+
+  } catch (err) {
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+
+// CREATE
 router.post(
   "/",
   auth,
@@ -87,31 +111,21 @@ router.post(
     try {
       const { aluno_id, turma_id } = req.body;
 
-      await pool.query(
-        `
-        INSERT INTO matriculas (
-          aluno_id,
-          turma_id
-        )
-        VALUES ($1,$2)
-        `,
-        [aluno_id, turma_id]
-      );
+      await pool.query(`
+        INSERT INTO matriculas (aluno_id, turma_id)
+        VALUES ($1, $2)
+      `, [aluno_id, turma_id]);
 
-      res.json({
-        ok: true
-      });
+      return res.json({ ok: true });
 
     } catch (err) {
-      res.status(500).json({
-        erro: err.message
-      });
+      return res.status(500).json({ erro: err.message });
     }
   }
 );
 
 
-// DELETE (admin apenas)
+// DELETE
 router.delete(
   "/:id",
   auth,
@@ -123,14 +137,10 @@ router.delete(
         [req.params.id]
       );
 
-      res.json({
-        ok: true
-      });
+      return res.json({ ok: true });
 
     } catch (err) {
-      res.status(500).json({
-        erro: err.message
-      });
+      return res.status(500).json({ erro: err.message });
     }
   }
 );
@@ -141,7 +151,6 @@ router.get("/turma/:id", auth, async (req, res) => {
   try {
     const user = req.user;
 
-    // 👑 ADMIN / SECRETARIA
     if (user.perfil === "admin" || user.perfil === "secretaria") {
       const result = await pool.query(`
         SELECT
@@ -149,8 +158,7 @@ router.get("/turma/:id", auth, async (req, res) => {
           a.nome,
           a.data_nascimento
         FROM matriculas m
-        INNER JOIN alunos a
-          ON a.id = m.aluno_id
+        INNER JOIN alunos a ON a.id = m.aluno_id
         WHERE m.turma_id = $1
         ORDER BY a.nome
       `, [req.params.id]);
@@ -158,7 +166,6 @@ router.get("/turma/:id", auth, async (req, res) => {
       return res.json(result.rows);
     }
 
-    // 👩‍🏫 PROFESSOR SOMENTE DAS TURMAS DELE
     if (user.perfil === "professor") {
       const result = await pool.query(`
         SELECT
@@ -166,30 +173,20 @@ router.get("/turma/:id", auth, async (req, res) => {
           a.nome,
           a.data_nascimento
         FROM matriculas m
-        INNER JOIN alunos a
-          ON a.id = m.aluno_id
-        INNER JOIN turmas t
-          ON t.id = m.turma_id
+        INNER JOIN alunos a ON a.id = m.aluno_id
+        INNER JOIN turmas t ON t.id = m.turma_id
         WHERE m.turma_id = $1
           AND t.professor_id = $2
         ORDER BY a.nome
-      `, [
-        req.params.id,
-        user.professor_id
-      ]);
+      `, [req.params.id, user.professor_id]);
 
       return res.json(result.rows);
     }
 
-    // 🧑 ALUNO NÃO PODE LISTAR TURMA
-    return res.status(403).json({
-      erro: "Acesso negado"
-    });
+    return res.status(403).json({ erro: "Acesso negado" });
 
   } catch (err) {
-    res.status(500).json({
-      erro: err.message
-    });
+    return res.status(500).json({ erro: err.message });
   }
 });
 
