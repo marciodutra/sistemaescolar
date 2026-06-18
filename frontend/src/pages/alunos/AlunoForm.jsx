@@ -161,7 +161,7 @@ export default function AlunoForm() {
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gridTemplateColumns: "1fr 1fr",
       gap: 10,
     },
     input: {
