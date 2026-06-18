@@ -22,6 +22,8 @@ import SuporteProfessor from "./pages/SuporteProfessor";
 import SuporteAdmin from "./pages/SuporteAdmin";
 import AlunoDetalhes from "./pages/alunos/AlunoDetalhes";
 import AlunoForm from "./pages/alunos/AlunoForm";
+import ProfessorForm from "./pages/professores/ProfessorForm";
+import ProfessorDetalhes from "./pages/professores/ProfessorDetalhes";
 
 function App() {
   return (
@@ -193,6 +195,10 @@ function App() {
     </PrivateRoute>
   }
 />
+
+<Route path="/professores/novo" element={<ProfessorForm />} />
+<Route path="/professores/:id" element={<ProfessorDetalhes />} />
+<Route path="/professores/:id/editar" element={<ProfessorForm />} />
       </Routes>
     </BrowserRouter>
   );
