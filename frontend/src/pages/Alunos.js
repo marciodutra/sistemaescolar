@@ -37,7 +37,7 @@ export default function Alunos() {
   function abrirAluno(id) {
     navigate(`/alunos/${id}`);
   }
-  
+
 
   function novoAluno() {
     navigate("/alunos/novo");
@@ -47,9 +47,11 @@ export default function Alunos() {
     if (!foto) return "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
 
     if (foto.startsWith("http")) return foto;
-   
+
     return `${import.meta.env.VITE_API_URL}/${foto}`;
   }
+
+  const perfil = localStorage.getItem("perfil")?.toLowerCase();
 
   const styles = {
     container: { padding: 20 },
@@ -137,9 +139,14 @@ export default function Alunos() {
         <div style={styles.header}>
           <div style={styles.title}>👨‍🎓 Alunos</div>
 
-          <button style={styles.button} onClick={novoAluno}>
-            + Novo aluno
-          </button>
+          {perfil !== "aluno" && (
+            <button
+              style={styles.button}
+              onClick={novoAluno}
+            >
+              + Novo aluno
+            </button>
+          )}
         </div>
 
         {/* BUSCA */}

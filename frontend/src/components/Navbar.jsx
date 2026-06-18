@@ -5,7 +5,7 @@ function Navbar() {
     const navigate = useNavigate();
     const [aberto, setAberto] = useState(false);
 
-    const perfil = localStorage.getItem("perfil");
+    const perfil = (localStorage.getItem("perfil") || "").toLowerCase();
 
     function logout() {
         localStorage.clear();
@@ -40,62 +40,128 @@ function Navbar() {
                     <ul className="navbar-nav me-auto">
 
                         <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/dashboard")}>
+                            <button
+                                className="btn btn-link nav-link"
+                                onClick={() => navigate("/dashboard")}
+                            >
                                 Dashboard
                             </button>
                         </li>
 
-                        <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/alunos")}>
-                                Alunos
-                            </button>
-                        </li>
-
-                        <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/professores")}>
-                                Professores
-                            </button>
-                        </li>
-
-                        <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/turmas")}>
-                                Turmas
-                            </button>
-                        </li>
-
-                        <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/matriculas")}>
-                                Matrículas
-                            </button>
-                        </li>
-
-                        <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/notas")}>
-                                Notas
-                            </button>
-                        </li>
-
+                        {/* ADMIN */}
                         {perfil === "admin" && (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/alunos")}
+                                    >
+                                        Alunos
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/professores")}
+                                    >
+                                        Professores
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/turmas")}
+                                    >
+                                        Turmas
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/matriculas")}
+                                    >
+                                        Matrículas
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/notas")}
+                                    >
+                                        Notas
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/usuarios")}
+                                    >
+                                        Usuários
+                                    </button>
+                                </li>
+                            </>
+                        )}
+
+                        {/* PROFESSOR */}
+                        {perfil === "professor" && (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/alunos")}
+                                    >
+                                        Alunos
+                                    </button>
+                                </li>
+
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-link nav-link"
+                                        onClick={() => navigate("/turmas")}
+                                    >
+                                        Turmas
+                                    </button>
+                                </li>
+                            </>
+                        )}
+
+                        {/* PROFESSOR E ALUNO */}
+                        {(perfil === "professor" || perfil === "aluno") && (
                             <li className="nav-item">
-                                <button className="btn btn-link nav-link" onClick={() => navigate("/usuarios")}>
-                                    Usuários
+                                <button
+                                    className="btn btn-link nav-link"
+                                    onClick={() => navigate("/notas")}
+                                >
+                                    Notas
                                 </button>
                             </li>
                         )}
 
+                        {/* TODOS */}
                         <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/boletim")}>
+                            <button
+                                className="btn btn-link nav-link"
+                                onClick={() => navigate("/boletim")}
+                            >
                                 Boletim
                             </button>
                         </li>
 
                         <li className="nav-item">
-                            <button className="btn btn-link nav-link" onClick={() => navigate("/ranking")}>
+                            <button
+                                className="btn btn-link nav-link"
+                                onClick={() => navigate("/ranking")}
+                            >
                                 Ranking
                             </button>
                         </li>
 
-
+                        {/* SUPORTE */}
                         {perfil === "aluno" && (
                             <li className="nav-item">
                                 <button
@@ -131,7 +197,10 @@ function Navbar() {
 
                     </ul>
 
-                    <button className="btn btn-danger btn-sm" onClick={logout}>
+                    <button
+                        className="btn btn-danger btn-sm"
+                        onClick={logout}
+                    >
                         Sair
                     </button>
 

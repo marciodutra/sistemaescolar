@@ -24,15 +24,23 @@ function Login() {
         }
       );
 
+      const { token, user } = response.data;
+
+      // 🔥 limpa tudo antes
       localStorage.clear();
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("id", response.data.user.id);
-      localStorage.setItem("nome", response.data.user.nome);
-      localStorage.setItem("perfil", response.data.user.perfil);
+      // 🔐 dados de autenticação
+      localStorage.setItem("token", token);
 
-      console.log("Login realizado");
-      console.log("Perfil:", response.data.user.perfil);
+      // 👤 usuário estruturado (IMPORTANTE)
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // (opcional manter compatibilidade)
+      localStorage.setItem("id", user.id);
+      localStorage.setItem("nome", user.nome);
+      localStorage.setItem("perfil", user.perfil);
+
+      console.log("Login realizado:", user.perfil);
 
       navigate("/dashboard");
 
