@@ -64,6 +64,7 @@ export default function Alunos() {
     title: {
       fontSize: 22,
       fontWeight: "bold",
+      color: "#fff",
     },
 
     button: {
