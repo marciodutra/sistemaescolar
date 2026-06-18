@@ -189,6 +189,15 @@ export default function AlunoForm() {
     },
   };
 
+  function mascaraCPF(valor) {
+    return valor
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
+  }
+
   return (
     <Layout titulo={id ? "Editar Aluno" : "Novo Aluno"}>
       <div style={styles.container}>
@@ -213,7 +222,12 @@ export default function AlunoForm() {
             <input style={styles.input} placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
             <input style={styles.input} placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
 
-            <input style={styles.input} placeholder="CPF" value={cpf} onChange={e => setCpf(e.target.value)} />
+            <input
+              style={styles.input}
+              placeholder="CPF"
+              value={cpf}
+              onChange={(e) => setCpf(mascaraCPF(e.target.value))}
+            />
             <input style={styles.input} placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
 
             <select style={styles.input} value={sexo} onChange={e => setSexo(e.target.value)}>
@@ -239,39 +253,39 @@ export default function AlunoForm() {
             <input style={styles.input} placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} />
 
             <select
-  style={styles.input}
-  value={estado}
-  onChange={(e) => setEstado(e.target.value)}
->
-  <option value="">Selecione o Estado</option>
-  <option value="AC">Acre</option>
-  <option value="AL">Alagoas</option>
-  <option value="AP">Amapá</option>
-  <option value="AM">Amazonas</option>
-  <option value="BA">Bahia</option>
-  <option value="CE">Ceará</option>
-  <option value="DF">Distrito Federal</option>
-  <option value="ES">Espírito Santo</option>
-  <option value="GO">Goiás</option>
-  <option value="MA">Maranhão</option>
-  <option value="MT">Mato Grosso</option>
-  <option value="MS">Mato Grosso do Sul</option>
-  <option value="MG">Minas Gerais</option>
-  <option value="PA">Pará</option>
-  <option value="PB">Paraíba</option>
-  <option value="PR">Paraná</option>
-  <option value="PE">Pernambuco</option>
-  <option value="PI">Piauí</option>
-  <option value="RJ">Rio de Janeiro</option>
-  <option value="RN">Rio Grande do Norte</option>
-  <option value="RS">Rio Grande do Sul</option>
-  <option value="RO">Rondônia</option>
-  <option value="RR">Roraima</option>
-  <option value="SC">Santa Catarina</option>
-  <option value="SP">São Paulo</option>
-  <option value="SE">Sergipe</option>
-  <option value="TO">Tocantins</option>
-</select>
+              style={styles.input}
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+            >
+              <option value="">Selecione o Estado</option>
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceará</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
+            </select>
             <input style={styles.input} placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} />
           </div>
 
