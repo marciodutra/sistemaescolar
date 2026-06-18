@@ -13,28 +13,31 @@ export default function TurmaForm() {
   const [professorId, setProfessorId] = useState("");
   const [professores, setProfessores] = useState([]);
 
-  async function carregarProfessores() {
-    const res = await api.get("/professores");
-    setProfessores(res.data);
-  }
-
-  async function carregar() {
-    if (!id) return;
-
-    const res = await api.get("/turmas");
-    const turma = res.data.find((t) => t.id === Number(id));
-
-    if (turma) {
-      setNome(turma.nome);
-      setAno(turma.ano);
-      setProfessorId(turma.professor_id || "");
-    }
-  }
-
   useEffect(() => {
-    carregar();
-    carregarProfessores();
-  }, []);
+    async function carregarDados() {
+      try {
+        // professores
+        const resProf = await api.get("/professores");
+        setProfessores(resProf.data);
+
+        // turma (edição)
+        if (id) {
+          const resTurma = await api.get(`/turmas/${id}`);
+
+          const turma = resTurma.data;
+
+          setNome(turma.nome);
+          setAno(turma.ano);
+          setProfessorId(turma.professor_id || "");
+        }
+      } catch (err) {
+        toast.error("Erro ao carregar dados");
+        console.log(err);
+      }
+    }
+
+    carregarDados();
+  }, [id]);
 
   async function salvar() {
     try {
