@@ -1,417 +1,122 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
-function Turmas() {
+export default function Turmas() {
   const navigate = useNavigate();
 
-  const [nome, setNome] = useState("");
-  const [ano, setAno] = useState("");
+  const [turmas, setTurmas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [professorId, setProfessorId] = useState("");
-  const [professores, setProfessores] = useState([]);
-
-  const [lista, setLista] = useState([]);
-
-  const [turmaAberta, setTurmaAberta] = useState(null);
-  const [alunosTurma, setAlunosTurma] = useState([]);
-  const [turmaEmEdicao, setTurmaEmEdicao] = useState(null);
-
-  async function carregar() {
+  const carregar = async () => {
     try {
-      const response = await api.get("/turmas");
-      setLista(response.data);
+      setLoading(true);
+      const res = await api.get("/turmas");
+      setTurmas(res.data);
     } catch (err) {
-      console.log("Erro ao carregar turmas:", err);
+      toast.error("Erro ao carregar turmas");
+    } finally {
+      setLoading(false);
     }
-  }
-
-  async function carregarProfessores() {
-    try {
-      const response = await api.get("/professores");
-      setProfessores(response.data);
-    } catch (err) {
-      console.log("Erro ao carregar professores:", err);
-    }
-  }
-
-  async function salvar() {
-  try {
-    if (!nome || !ano) {
-      toast.warning("Preencha todos os campos!");
-      return;
-    }
-
-    if (turmaEmEdicao) {
-      await api.put(`/turmas/${turmaEmEdicao.id}`, {
-        nome,
-        ano: Number(ano),
-        professor_id: professorId || null,
-      });
-
-      toast.success("✅ Turma atualizada com sucesso!");
-    } else {
-      await api.post("/turmas", {
-        nome,
-        ano: Number(ano),
-        professor_id: professorId || null,
-      });
-
-      toast.success("✅ Turma adicionada com sucesso!");
-    }
-
-    setNome("");
-    setAno("");
-    setProfessorId("");
-    setTurmaEmEdicao(null);
-
-    carregar();
-
-  } catch (err) {
-    toast.error("❌ Erro ao salvar turma");
-    console.log("Erro ao salvar turma:", err);
-  }
-}
-
-  async function verAlunos(id) {
-    try {
-      if (turmaAberta === id) {
-        setTurmaAberta(null);
-        setAlunosTurma([]);
-        return;
-      }
-
-      const response = await api.get(
-        `/matriculas/turma/${id}`
-      );
-
-      setTurmaAberta(id);
-      setAlunosTurma(response.data);
-
-    } catch (err) {
-      console.log("Erro ao carregar alunos da turma:", err);
-    }
-  }
-
-  async function editar(turma) {
-  setTurmaEmEdicao(turma);
-  setNome(turma.nome);
-  setAno(turma.ano.toString());
-
-  setProfessorId(
-    turma.professor_id
-      ? turma.professor_id.toString()
-      : ""
-  );
-}
-
-  async function excluir(id) {
-    if (!window.confirm("Tem certeza que deseja excluir esta turma?")) {
-      return;
-    }
-
-    try {
-      await api.delete(`/turmas/${id}`);
-      toast.success("✅ Turma excluída com sucesso!");
-      carregar();
-    } catch (err) {
-      toast.error("❌ Erro ao excluir turma: " + err.message);
-      console.log("Erro ao excluir turma:", err);
-    }
-  }
-
-  function cancelarEdicao() {
-  setTurmaEmEdicao(null);
-  setNome("");
-  setAno("");
-  setProfessorId("");
-}
+  };
 
   useEffect(() => {
     carregar();
-    carregarProfessores();
   }, []);
 
+  const abrirTurma = (id) => {
+    navigate(`/turmas/${id}`);
+  };
+
+  const novaTurma = () => {
+    navigate("/turmas/novo");
+  };
+
   return (
-    <Layout titulo="Cadastro de Turmas">
+    <Layout titulo="Turmas">
       <div style={styles.container}>
-        <div style={styles.card}>
+        {/* HEADER */}
+        <div style={styles.header}>
+          <h2 style={styles.title}>🏫 Turmas</h2>
 
-          <div style={styles.header}>
-            <h1 style={styles.title}>
-              {turmaEmEdicao ? "Editar Turma" : "Cadastro de Turmas"}
-            </h1>
+          <button style={styles.button} onClick={novaTurma}>
+            + Nova turma
+          </button>
+        </div>
 
-            <button
-              onClick={() => navigate("/dashboard")}
-              style={styles.backButton}
-            >
-              ← Voltar
-            </button>
-          </div>
-
-          <div style={styles.form}>
-            <input
-              placeholder="Nome da turma"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              style={styles.input}
-            />
-
-            <input
-              placeholder="Ano"
-              type="number"
-              value={ano}
-              onChange={(e) => setAno(e.target.value)}
-              style={styles.input}
-            />
-
-            <select
-              value={professorId}
-              onChange={(e) => setProfessorId(e.target.value)}
-              style={styles.input}
-            >
-              <option value="">
-                Selecione um professor
-              </option>
-
-              {professores.map((prof) => (
-                <option
-                  key={prof.id}
-                  value={prof.id}
-                >
-                  {prof.nome}
-                </option>
-              ))}
-            </select>
-
-            <div style={styles.buttonGroup}>
-              <button
-                onClick={salvar}
-                style={styles.saveButton}
-              >
-                {turmaEmEdicao ? "Atualizar" : "Salvar turma"}
-              </button>
-              {turmaEmEdicao && (
-                <button
-                  style={styles.cancelButton}
-                  onClick={cancelarEdicao}
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-
-          <hr style={{ margin: "20px 0" }} />
-
-          <h2>Turmas cadastradas</h2>
-
+        {/* LISTA */}
+        {loading ? (
+          <p>Carregando...</p>
+        ) : (
           <div style={styles.list}>
-            {lista.map((t) => (
-              <div key={t.id} className="mb-2">
-
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3 bg-light rounded">
-
-                  <div>
-                    <strong>{t.nome}</strong>
-                    <div className="text-muted">{t.ano}</div>
-                  </div>
-
-                  <div className="d-flex flex-wrap gap-2 mt-2 mt-md-0">
-
-                    <button
-                      className="btn btn-sm btn-success"
-                      onClick={() => editar(t)}
-                    >
-                      Editar
-                    </button>
-
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => excluir(t.id)}
-                    >
-                      Excluir
-                    </button>
-
-                    <button
-                      className="btn btn-sm btn-info text-white"
-                      onClick={() => verAlunos(t.id)}
-                    >
-                      {turmaAberta === t.id ? "Ocultar" : "Alunos"}
-                    </button>
-
-                  </div>
+            {turmas.map((t) => (
+              <div
+                key={t.id}
+                style={styles.card}
+                onClick={() => abrirTurma(t.id)}
+              >
+                <div>
+                  <strong>{t.nome}</strong>
+                  <div style={styles.sub}>Ano: {t.ano}</div>
                 </div>
 
-                {turmaAberta === t.id && (
-                  <div className="bg-primary-subtle p-3 rounded mt-2">
-
-                    <strong>Alunos matriculados:</strong>
-
-                    {alunosTurma.length === 0 ? (
-                      <p className="mb-0">Nenhum aluno matriculado.</p>
-                    ) : (
-                      alunosTurma.map((a) => (
-                        <div key={a.id}>👨‍🎓 {a.nome}</div>
-                      ))
-                    )}
-
-                  </div>
-                )}
-
+                <div style={styles.arrow}>›</div>
               </div>
             ))}
           </div>
-
-        </div>
+        )}
       </div>
     </Layout>
   );
 }
 
 const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    padding: 20,
-  },
-
-  card: {
-    width: "100%",
-    maxWidth: 700,
-    background: "rgba(255,255,255,0.98)",
-    borderRadius: 20,
-    padding: 25,
-    boxShadow: "0 20px 50px rgba(0,0,0,.25)",
-  },
+  container: { padding: 20 },
 
   header: {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
 
   title: {
+    color: "#fff",
     margin: 0,
   },
 
-  backButton: {
-    background: "#e2e8f0",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: 10,
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-
-  input: {
-    padding: 12,
-    borderRadius: 10,
-    border: "1px solid #cbd5e1",
-    fontSize: 14,
-  },
-
-  buttonGroup: {
-    display: "flex",
-    gap: 10,
-  },
-
-  saveButton: {
-    flex: 1,
-    padding: 12,
+  button: {
     background: "#2563eb",
     color: "#fff",
     border: "none",
-    borderRadius: 10,
+    padding: "10px 15px",
+    borderRadius: 8,
     cursor: "pointer",
-    fontWeight: "bold",
-  },
-
-  cancelButton: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "#cbd5e1",
-    color: "#000",
-    border: "none",
-    borderRadius: 10,
-    cursor: "pointer",
-    fontWeight: "bold",
   },
 
   list: {
-    display: "flex",
-    flexDirection: "column",
+    display: "grid",
     gap: 10,
   },
 
-  item: {
+  card: {
+    background: "#fff",
+    padding: 15,
+    borderRadius: 12,
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: 12,
-    background: "#f8fafc",
-    borderRadius: 10,
-  },
-
-  itemActions: {
-    display: "flex",
-    gap: 8,
-  },
-
-  editButton: {
-    padding: "6px 12px",
-    backgroundColor: "#16a34a",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
     cursor: "pointer",
+  },
+
+  sub: {
     fontSize: 12,
-    fontWeight: "bold",
+    color: "#666",
   },
 
-  deleteButton: {
-    padding: "6px 12px",
-    backgroundColor: "#dc2626",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-
-  viewButton: {
-    background: "#06b6d4",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    padding: "6px 12px",
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-
-  alunosBox: {
-    background: "#eef2ff",
-    padding: 12,
-    borderRadius: 10,
-    marginTop: 5,
-    marginBottom: 10,
-  },
-
-  aluno: {
-    padding: 5,
+  arrow: {
+    color: "#999",
+    fontSize: 18,
   },
 };
-
-export default Turmas;

@@ -4,26 +4,39 @@ import "react-toastify/dist/ReactToastify.css";
 
 import PrivateRoute from "./components/PrivateRoute";
 
+// Páginas principais
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+
+// Alunos
 import Alunos from "./pages/Alunos";
+import AlunoDetalhes from "./pages/alunos/AlunoDetalhes";
+import AlunoForm from "./pages/alunos/AlunoForm";
+
+// Professores
 import Professores from "./pages/Professores";
+import ProfessorForm from "./pages/professores/ProfessorForm";
+import ProfessorDetalhes from "./pages/professores/ProfessorDetalhes";
+
+// Turmas
 import Turmas from "./pages/Turmas";
+import TurmaForm from "./pages/turmas/TurmaForm";
+import TurmaDetalhes from "./pages/turmas/TurmaDetalhes";
+
+// Outros módulos
 import Matriculas from "./pages/Matriculas";
 import Usuarios from "./pages/Usuarios";
 import Notas from "./pages/Notas";
 import Boletim from "./pages/Boletim";
 import Ranking from "./pages/Ranking";
+
+// Suporte
 import Suporte from "./pages/Suporte";
 import TicketDetalhe from "./pages/TicketDetalhe";
 import SuporteAluno from "./pages/SuporteAluno";
 import SuporteProfessor from "./pages/SuporteProfessor";
 import SuporteAdmin from "./pages/SuporteAdmin";
-import AlunoDetalhes from "./pages/alunos/AlunoDetalhes";
-import AlunoForm from "./pages/alunos/AlunoForm";
-import ProfessorForm from "./pages/professores/ProfessorForm";
-import ProfessorDetalhes from "./pages/professores/ProfessorDetalhes";
 
 function App() {
   return (
@@ -34,18 +47,22 @@ function App() {
         hideProgressBar={false}
         newestOnTop={true}
         closeOnClick
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
       />
 
       <Routes>
-        {/* Públicas */}
+
+        {/* ===================== */}
+        {/* PÚBLICAS */}
+        {/* ===================== */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Dashboard */}
+        {/* ===================== */}
+        {/* DASHBOARD */}
+        {/* ===================== */}
         <Route
           path="/dashboard"
           element={
@@ -55,7 +72,9 @@ function App() {
           }
         />
 
-        {/* Cadastros */}
+        {/* ===================== */}
+        {/* ALUNOS */}
+        {/* ===================== */}
         <Route
           path="/alunos"
           element={
@@ -66,6 +85,36 @@ function App() {
         />
 
         <Route
+          path="/alunos/novo"
+          element={
+            <PrivateRoute>
+              <AlunoForm />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/alunos/:id"
+          element={
+            <PrivateRoute>
+              <AlunoDetalhes />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/alunos/:id/editar"
+          element={
+            <PrivateRoute>
+              <AlunoForm />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ===================== */}
+        {/* PROFESSORES */}
+        {/* ===================== */}
+        <Route
           path="/professores"
           element={
             <PrivateRoute>
@@ -75,6 +124,36 @@ function App() {
         />
 
         <Route
+          path="/professores/novo"
+          element={
+            <PrivateRoute>
+              <ProfessorForm />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/professores/:id"
+          element={
+            <PrivateRoute>
+              <ProfessorDetalhes />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/professores/:id/editar"
+          element={
+            <PrivateRoute>
+              <ProfessorForm />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ===================== */}
+        {/* TURMAS */}
+        {/* ===================== */}
+        <Route
           path="/turmas"
           element={
             <PrivateRoute>
@@ -83,6 +162,36 @@ function App() {
           }
         />
 
+        <Route
+          path="/turmas/novo"
+          element={
+            <PrivateRoute>
+              <TurmaForm />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/turmas/:id"
+          element={
+            <PrivateRoute>
+              <TurmaDetalhes />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/turmas/:id/editar"
+          element={
+            <PrivateRoute>
+              <TurmaForm />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ===================== */}
+        {/* OUTROS MÓDULOS */}
+        {/* ===================== */}
         <Route
           path="/matriculas"
           element={
@@ -110,11 +219,15 @@ function App() {
           }
         />
 
-        {/* Consultas */}
+        {/* ===================== */}
+        {/* CONSULTAS */}
+        {/* ===================== */}
         <Route path="/boletim" element={<Boletim />} />
         <Route path="/ranking" element={<Ranking />} />
 
-        {/* Sistema antigo de tickets */}
+        {/* ===================== */}
+        {/* SUPORTE */}
+        {/* ===================== */}
         <Route
           path="/suporte"
           element={
@@ -133,7 +246,6 @@ function App() {
           }
         />
 
-        {/* Novo suporte */}
         <Route
           path="/suporte-aluno"
           element={
@@ -161,44 +273,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/alunos/:id"
-          element={
-            <PrivateRoute>
-              <AlunoDetalhes />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/alunos/novo"
-          element={
-            <PrivateRoute>
-              <AlunoForm />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/alunos/:id"
-          element={
-            <PrivateRoute>
-              <AlunoForm />
-            </PrivateRoute>
-          }
-        />
-        <Route
-  path="/alunos/:id/editar"
-  element={
-    <PrivateRoute>
-      <AlunoForm />
-    </PrivateRoute>
-  }
-/>
-
-<Route path="/professores/novo" element={<ProfessorForm />} />
-<Route path="/professores/:id" element={<ProfessorDetalhes />} />
-<Route path="/professores/:id/editar" element={<ProfessorForm />} />
       </Routes>
     </BrowserRouter>
   );
