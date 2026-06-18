@@ -153,23 +153,30 @@ export default function AlunoForm() {
       borderRadius: 20,
       padding: 25,
       boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+      justifyContent: "center",
+      padding: 20,
+      width: "100%",
+      boxSizing: "border-box"
     },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
     grid: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
       gap: 10,
     },
     input: {
       padding: 12,
       borderRadius: 8,
       border: "1px solid #ddd",
+      width: "100%",
+      boxSizing: "border-box"
     },
     fotoBox: {
       display: "flex",
       alignItems: "center",
       gap: 15,
       marginBottom: 15,
+      flexWrap: "wrap"
     },
     foto: {
       width: 80,
