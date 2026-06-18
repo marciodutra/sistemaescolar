@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import Layout from "../../components/Layout";
-import "./AlunoForm.css";
 
 export default function AlunoForm() {
   const navigate = useNavigate();
@@ -32,6 +31,7 @@ export default function AlunoForm() {
   const [foto, setFoto] = useState(null);
   const [fotoAtual, setFotoAtual] = useState(null);
 
+  // ✅ FUNÇÃO CORRETA (useCallback)
   const carregarAluno = useCallback(async () => {
     if (!id) return;
 
@@ -75,6 +75,7 @@ export default function AlunoForm() {
     }
   }, [id, navigate]);
 
+  // ✅ useEffect correto
   useEffect(() => {
     carregarAluno();
   }, [carregarAluno]);
@@ -143,64 +144,159 @@ export default function AlunoForm() {
     }
   }
 
+  const styles = {
+    container: { display: "flex", justifyContent: "center", padding: 20 },
+    card: {
+      width: "100%",
+      maxWidth: 800,
+      background: "#fff",
+      borderRadius: 20,
+      padding: 25,
+      boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+      justifyContent: "center",
+      padding: 20,
+      width: "100%",
+      boxSizing: "border-box"
+    },
+    title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gap: 10,
+    },
+    input: {
+      padding: 12,
+      borderRadius: 8,
+      border: "1px solid #ddd",
+      width: "100%",
+      boxSizing: "border-box"
+    },
+    fotoBox: {
+      display: "flex",
+      alignItems: "center",
+      gap: 15,
+      marginBottom: 15,
+      flexWrap: "wrap"
+    },
+    foto: {
+      width: 80,
+      height: 80,
+      borderRadius: "50%",
+      objectFit: "cover",
+    },
+    button: {
+      marginTop: 20,
+      width: "100%",
+      padding: 12,
+      background: "#2563eb",
+      color: "#fff",
+      border: "none",
+      borderRadius: 10,
+      cursor: "pointer",
+    },
+  };
+
+  function mascaraCPF(valor) {
+    return valor
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
+  }
+
   return (
     <Layout titulo={id ? "Editar Aluno" : "Novo Aluno"}>
-      <div className="aluno-container">
-        <div className="aluno-card">
-          <div className="aluno-title">
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <div style={styles.title}>
             {id ? "Editar Aluno" : "Cadastro de Aluno"}
           </div>
 
-          <div className="foto-box">
+          {/* FOTO */}
+          <div style={styles.fotoBox}>
             <img
               src={foto ? URL.createObjectURL(foto) : getFoto(fotoAtual)}
-              className="foto"
+              style={styles.foto}
               alt="foto"
             />
 
             <input type="file" onChange={(e) => setFoto(e.target.files[0])} />
           </div>
 
-          <div className="grid">
-            <input className="input" placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
-            <input className="input" placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
+          {/* FORM */}
+          <div style={styles.grid}>
+            <input style={styles.input} placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
+            <input style={styles.input} placeholder="Responsável" value={responsavel} onChange={e => setResponsavel(e.target.value)} />
 
-            <input className="input" placeholder="CPF" value={cpf} onChange={(e) => setCpf(e.target.value)} />
-            <input className="input" placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
+            <input
+              style={styles.input}
+              placeholder="CPF"
+              value={cpf}
+              onChange={(e) => setCpf(mascaraCPF(e.target.value))}
+            />
+            <input style={styles.input} placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
 
-            <select className="input" value={sexo} onChange={e => setSexo(e.target.value)}>
+            <select style={styles.input} value={sexo} onChange={e => setSexo(e.target.value)}>
               <option value="">Sexo</option>
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
 
-            <input className="input" placeholder="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
+            <input style={styles.input} placeholder="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
 
-            <input className="input" type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
+            <input style={styles.input} type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
 
-            <input className="input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+            <input style={styles.input} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
 
             {!id && (
-              <input className="input" type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
+              <input style={styles.input} type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
             )}
 
-            <input className="input" placeholder="Rua" value={logradouro} onChange={e => setLogradouro(e.target.value)} />
-            <input className="input" placeholder="Número" value={numero} onChange={e => setNumero(e.target.value)} />
+            <input style={styles.input} placeholder="Rua" value={logradouro} onChange={e => setLogradouro(e.target.value)} />
+            <input style={styles.input} placeholder="Número" value={numero} onChange={e => setNumero(e.target.value)} />
 
-            <input className="input" placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} />
-            <input className="input" placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} />
+            <input style={styles.input} placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value)} />
+            <input style={styles.input} placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} />
 
-            <select className="input" value={estado} onChange={e => setEstado(e.target.value)}>
-              <option value="">Estado</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="SP">São Paulo</option>
+            <select
+              style={styles.input}
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+            >
+              <option value="">Selecione o Estado</option>
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceará</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
               <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
             </select>
-
-            <input className="input" placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} />
+            <input style={styles.input} placeholder="CEP" value={cep} onChange={e => setCep(e.target.value)} />
           </div>
 
-          <button className="button" onClick={salvar} disabled={loading}>
+          <button style={styles.button} onClick={salvar} disabled={loading}>
             {loading ? "Salvando..." : "Salvar aluno"}
           </button>
         </div>
