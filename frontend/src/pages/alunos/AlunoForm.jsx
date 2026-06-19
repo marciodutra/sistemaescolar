@@ -153,9 +153,7 @@ export default function AlunoForm() {
       borderRadius: 20,
       padding: 25,
       boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-      justifyContent: "center",
-      padding: 20,
-      width: "100%",
+      justifyContent: "center",      
       boxSizing: "border-box"
     },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
