@@ -4,6 +4,7 @@ import api from "../services/api";
 import Select from "react-select";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import logo from "../img/logo.jpg";
 
 function Boletim() {
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
@@ -77,12 +78,50 @@ function Boletim() {
           >
 
             {/* CABEÇALHO ESCOLA */}
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <h4>SISTEMA ESCOLAR</h4>
-              <p style={{ margin: 0 }}>
-                Histórico Escolar - Boletim de Notas
-              </p>
-              <hr />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                borderBottom: "2px solid #1e3a8a",
+                paddingBottom: "15px",
+                marginBottom: "25px",
+              }}
+            >
+              <img
+                src={logo}
+                alt="Logo"
+                style={{
+                  width: "90px",
+                  height: "90px",
+                  objectFit: "contain",
+                  marginRight: "20px",
+                }}
+              />
+
+              <div>
+                <h2
+                  style={{
+                    margin: 0,
+                    color: "#1e3a8a",
+                    fontWeight: 700,
+                  }}
+                >
+                  SISTEMA ESCOLAR
+                </h2>
+
+                <p
+                  style={{
+                    margin: "5px 0",
+                    color: "#475569",
+                  }}
+                >
+                  Histórico Escolar - Boletim de Notas
+                </p>
+
+                <small style={{ color: "#64748b" }}>
+                  Documento oficial de desempenho acadêmico
+                </small>
+              </div>
             </div>
 
             {/* ALUNO */}
@@ -128,8 +167,8 @@ function Boletim() {
                     dados.situacao === "Aprovado"
                       ? "green"
                       : dados.situacao === "Recuperação"
-                      ? "orange"
-                      : "red",
+                        ? "orange"
+                        : "red",
                 }}
               >
                 Situação: {dados.situacao}
